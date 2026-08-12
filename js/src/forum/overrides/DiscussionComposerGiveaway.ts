@@ -31,7 +31,8 @@ export default function init() {
                         after[0];
                       if (!g) return;
 
-                      const link = `[🎁 ${g.title}](/giveaways/${g.slug})`;
+                      const link = `[giveaway slug=${g.slug}]`;
+                      // const link = `[🎁 ${g.title}](/giveaways/${g.slug})`;
                       const editor = dc.composer?.editor;
 
                       if (

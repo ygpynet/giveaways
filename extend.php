@@ -29,6 +29,10 @@ return [
 
     new Extend\Locales(__DIR__ . '/locale'),
 
+     (new Extend\Formatter())
+        ->configure(\ErnestDefoe\Giveaways\Formatter\GiveawayCardConfigure::class)
+        ->render(\ErnestDefoe\Giveaways\Formatter\GiveawayCardRender::class),
+
     (new Extend\Settings())
         ->serializeToForum('giveawaysNavLabel', 'ernestdefoe-giveaways.nav_label')
         ->serializeToForum('giveawaysShowNav', 'ernestdefoe-giveaways.show_nav', 'boolval', true),
