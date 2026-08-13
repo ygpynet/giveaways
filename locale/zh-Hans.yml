@@ -15,7 +15,7 @@ ernestdefoe-giveaways:
     page_title: 抽奖活动
     heading: 抽奖活动
     subheading: "参与抽奖，赢取好礼。中奖名单开奖公开透明且可验证。"
-    giveaway_badge_tooltip: "该帖包含抽奖"
+    giveaway_badge_tooltip: "抽奖"
     empty: "暂无抽奖活动，过段时间再来看看吧！"
     active_heading: "正在进行"
     past_heading: "往期抽奖"
@@ -72,7 +72,7 @@ ernestdefoe-giveaways:
     create: "发布抽奖"
     edit: 编辑
     delete: 删除
-    draw_now: "立即开奖"
+    draw_now: "开奖"
     confirm_delete: "确定要删除此抽奖活动及其所有参与记录吗？"
     confirm_draw: "确定要立即开奖吗？这将立即结束该抽奖活动。"
     saved: "抽奖活动已保存。"
