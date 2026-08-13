@@ -65,3 +65,15 @@ app.initializers.add("ernestdefoe-giveaways", () => {
     );
   });
 });
+
+document.addEventListener("click", (e) => {
+  if (e.defaultPrevented) return; // 已有 Mithril Link 处理的卡片跳过
+  const card = (e.target as Element | null)?.closest?.("a.GiveawayCard");
+  if (!card) return;
+  if (e.button !== 0 || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey)
+    return;
+  const href = card.getAttribute("href");
+  if (!href) return;
+  e.preventDefault();
+  m.route.set(href);
+});

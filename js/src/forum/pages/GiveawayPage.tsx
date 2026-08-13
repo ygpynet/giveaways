@@ -27,6 +27,11 @@ export default class GiveawayPage extends Page {
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
+    app.history?.push(
+      "giveaway",
+      app.translator.trans("ernestdefoe-giveaways.forum.page_title"),
+      m.route.get(),
+    );
     this.load();
   }
 
