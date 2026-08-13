@@ -1,5 +1,4 @@
 ernestdefoe-giveaways:
-
   # Server-side messages (validation + eligibility), returned localized per actor.
   api:
     title_required: A title is required.
@@ -19,6 +18,7 @@ ernestdefoe-giveaways:
     page_title: Giveaways
     heading: Giveaways
     subheading: Enter for a chance to win. Winners are drawn fairly and verifiably.
+    giveaway_badge_tooltip: "This topic contains a giveaway"
     empty: No giveaways right now. Check back soon!
     active_heading: Open now
     past_heading: Past giveaways

@@ -15,6 +15,10 @@ use ErnestDefoe\Giveaways\Notification\GiveawayWonBlueprint;
 use Flarum\Extend;
 use Flarum\Post\Event\Posted;
 use Illuminate\Console\Scheduling\Event as ScheduledEvent;
+use Flarum\Api\Resource\DiscussionResource;
+use Flarum\Api\Endpoint\Endpoint;
+use Flarum\Api\Schema;
+use Flarum\Discussion\Discussion;
 
 return [
     (new Extend\Frontend('forum'))
@@ -65,4 +69,17 @@ return [
         ->schedule('giveaways:draw-due', function (ScheduledEvent $event) {
             $event->everyMinute()->withoutOverlapping();
         }),
+    
+    (new Extend\ApiResource(DiscussionResource::class))
+    ->endpoint(Endpoint\Index::class, function (Endpoint $endpoint) {
+        return $endpoint->eagerLoad('firstPost');
+    })
+    ->fields(function () {
+        return [
+            Schema\Boolean::make('hasGiveaway')
+                ->get(function (Discussion $discussion) {
+                    return (bool) preg_match('/\[giveaway slug=/', (string) ($discussion->firstPost?->content ?? ''));
+                }),
+        ];
+    }),
 ];

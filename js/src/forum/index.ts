@@ -9,8 +9,27 @@ import GiveawayWonNotification from "./components/GiveawayWonNotification";
 import GiveawayClaimedNotification from "./components/GiveawayClaimedNotification";
 import Giveaway from "../common/models/Giveaway";
 import initComposerGiveaway from "./overrides/DiscussionComposerGiveaway";
+import Discussion from "flarum/common/models/Discussion";
+import Badge from "flarum/common/components/Badge";
 
 initComposerGiveaway();
+
+extend(Discussion.prototype, "badges", function (badges: any) {
+  if (this.attribute("hasGiveaway")) {
+    badges.add(
+      "giveaway",
+      Badge.component({
+        type: "giveaway",
+        icon: "fas fa-gift",
+        label: app.translator.trans(
+          "ernestdefoe-giveaways.forum.giveaway_badge_tooltip",
+        ),
+        tabindex: "0",
+      }),
+      5,
+    );
+  }
+});
 
 app.initializers.add("ernestdefoe-giveaways", () => {
   app.store.models.giveaways = Giveaway;

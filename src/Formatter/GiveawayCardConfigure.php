@@ -29,5 +29,6 @@ XML
         );
 
         $config->tags['GIVEAWAY']->attributes['slug']->required = true;
+        $config->tags['GIVEAWAY']->rules->breakParagraph();
     }
 }

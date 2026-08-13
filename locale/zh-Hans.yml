@@ -15,6 +15,7 @@ ernestdefoe-giveaways:
     page_title: 抽奖活动
     heading: 抽奖活动
     subheading: "参与抽奖，赢取好礼。中奖名单开奖公开透明且可验证。"
+    giveaway_badge_tooltip: "该帖包含抽奖"
     empty: "暂无抽奖活动，过段时间再来看看吧！"
     active_heading: "正在进行"
     past_heading: "往期抽奖"
