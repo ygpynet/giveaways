@@ -11,7 +11,7 @@ class GiveawayCardConfigure
         $config->BBCodes->addCustom(
             '[giveaway slug={TEXT} cover={URL?}]',
             <<<'XML'
-<a class="GiveawayCard" href="/giveaways/{@slug}">
+<a class="GiveawayCard" href="/giveaways/{@slug}" style="margin:20px">
   <xsl:choose>
     <xsl:when test="@cover != ''">
         <div class="GiveawayCard-cover" style="background-image: url('{@cover}');">
