@@ -58,7 +58,11 @@ app.initializers.add("ernestdefoe-giveaways", () => {
     items.add(
       "giveaways",
       LinkButton.component(
-        { href: app.route("giveaways.index"), icon: "fas fa-gift" },
+        {
+          href: app.route("giveaways.index"),
+          icon: "fa-solid fa-gift",
+          className: "Badge--giveaway",
+        },
         label,
       ),
       5,
