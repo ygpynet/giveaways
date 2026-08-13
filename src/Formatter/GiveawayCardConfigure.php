@@ -9,13 +9,22 @@ class GiveawayCardConfigure
     public function __invoke(Configurator $config): void
     {
         $config->BBCodes->addCustom(
-            '[giveaway slug={TEXT}]',
+            '[giveaway slug={TEXT} cover={URL?}]',
             <<<'XML'
 <a class="GiveawayCard" href="/giveaways/{@slug}">
-  <div class="GiveawayCard-cover GiveawayCard-cover--placeholder">
-    <i class="icon fas fa-gift" aria-hidden="true"></i>
-    <span class="GiveawayCard-status GiveawayCard-status--{@status}">{@statuslabel}</span>
-  </div>
+  <xsl:choose>
+    <xsl:when test="@cover != ''">
+        <div class="GiveawayCard-cover" style="background-image: url('{@cover}');">
+          <span class="GiveawayCard-status GiveawayCard-status--{@status}">{@statuslabel}</span>
+        </div>
+      </xsl:when>
+    <xsl:otherwise>
+    <div class="GiveawayCard-cover GiveawayCard-cover--placeholder">
+      <i class="icon fas fa-gift" aria-hidden="true"></i>
+      <span class="GiveawayCard-status GiveawayCard-status--{@status}">{@statuslabel}</span>
+    </div>
+     </xsl:otherwise>
+  </xsl:choose>
   <div class="GiveawayCard-body">
     <h3 class="GiveawayCard-title">{@title}</h3>
     <div class="GiveawayCard-prize"><i class="icon fas fa-trophy" aria-hidden="true"></i> {@prize}</div>

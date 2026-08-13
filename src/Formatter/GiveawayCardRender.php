@@ -37,6 +37,7 @@ class GiveawayCardRender
     protected function card(Giveaway $g): string
     {
         return '<GIVEAWAY slug="'.$this->xml($g->slug).'"'
+            .' cover="'.$this->xml((string) $g->cover_url).'"'
             .' status="'.$this->xml($g->status).'"'
             .' statuslabel="'.$this->xml($this->translator->trans('ernestdefoe-giveaways.forum.status_'.$g->status)).'"'
             .' title="'.$this->xml($g->title).'"'
