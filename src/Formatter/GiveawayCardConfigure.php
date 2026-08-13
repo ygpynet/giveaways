@@ -9,7 +9,7 @@ class GiveawayCardConfigure
     public function __invoke(Configurator $config): void
     {
         $config->BBCodes->addCustom(
-            '[giveaway slug={TEXT} cover={URL?}]',
+            '[giveaway slug={TEXT} cover={URL?} categorycolor={COLOR?}]',
             <<<'XML'
 <a class="GiveawayCard" href="/giveaways/{@slug}" style="margin:20px">
   <xsl:choose>
@@ -26,6 +26,14 @@ class GiveawayCardConfigure
      </xsl:otherwise>
   </xsl:choose>
   <div class="GiveawayCard-body">
+    <xsl:if test="@category != ''">
+      <span class="GiveawayCard-category" style="color: {@categorycolor}">
+        <xsl:if test="@categoryicon != ''">
+          <i class="icon {@categoryicon}" aria-hidden="true"></i>
+        </xsl:if>
+        {@category}
+      </span>
+    </xsl:if>
     <h3 class="GiveawayCard-title">{@title}</h3>
     <div class="GiveawayCard-prize"><i class="icon fas fa-trophy" aria-hidden="true"></i> {@prize}</div>
     <div class="GiveawayCard-meta">
