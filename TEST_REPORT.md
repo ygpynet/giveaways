@@ -1,14 +1,14 @@
 # Giveaways 扩展测试报告
 
 - 被测对象：`ygpynet/giveaways`（Flarum 2 抽奖扩展）
-- 版本：基于仓库 `main` 分支当前工作区（含上轮设计评审修复）
+- 版本：仓库 `main` 分支当前工作区（含设计评审实施轮，提交 `1933473`）
 - 测试日期：2026-08-14
 - 测试环境：
   - PHP 8.3.32（CLI，NTS）
   - Flarum core v2.0.0-rc.5（论坛根目录 `D:\phpstudy_pro\WWW`）
   - MySQL（PDO 驱动已加载）
   - Node.js v22.23.0 / npm 11.14.1 / webpack 5.107.2
-  - PHPUnit 11.5.56（扩展独立 vendor）
+  - PHPUnit 11.5.56 / PHPStan 2.2.x（扩展独立 vendor）
 - 负责人：ygpynet
 
 ---
@@ -17,22 +17,22 @@
 
 | 类别 | 用例数 | 自动执行 | 通过 | 未执行/需环境 |
 |---|---|---|---|---|
-| 单元测试（PHPUnit） | 24 | 24 | 24 | 0 |
-| 静态检查（lint / YAML / 键完整性） | 4 | 4 | 4 | 0 |
-| 构建 & 冒烟（CLI / webpack） | 3 | 3 | 3 | 0 |
+| 单元测试（PHPUnit） | 35 | 35 | 35 | 0 |
+| 静态检查（lint / YAML / 键完整性 / DI 冒烟） | 5 | 5 | 5 | 0 |
+| 构建 & 冒烟（webpack / 类型） | 2 | 2 | 2 | 0 |
 | 性能基准（pick 大数据量） | 1 | 1 | 1 | 0 |
-| 功能 / 集成（需运行环境） | 13 | 0 | — | 13 |
+| 功能 / 集成（需运行环境） | 23 | 0 | — | 23 |
 | 安全测试 | 5 | 2（自动化） | 2 | 3（含代码审查） |
 | 可用性 / 兼容性 / 回归 | 4 | 0 | — | 4 |
-| **合计** | **54** | **34** | **34** | **20** |
+| **合计** | **75** | **45** | **45** | **30** |
 
-> 说明：所有自动化用例均已实际执行并记录结果；需真实 Web 环境（Web 服务器 + 已配置数据库 + 浏览器）的用例给出标准步骤与预期，标记"未执行"。
+> 说明：所有自动化用例均已实际执行并记录结果（本轮实测：PHPUnit 35 tests / 73 assertions OK）；需真实 Web 环境（Web 服务器 + 已配置数据库 + 浏览器）的用例给出标准步骤与预期，标记"未执行"。
 
 ---
 
 ## 2. 单元测试（自动化，PHPUnit 11）
 
-执行命令：`vendor/bin/phpunit`（扩展目录下）→ **24 tests / 47 assertions，OK**
+执行命令：`vendor/bin/phpunit`（扩展目录下）→ **35 tests / 73 assertions，OK**
 
 ### 2.1 DrawService::pick() — 公平性核心算法（8 例，tests/DrawServiceTest.php）
 
@@ -73,18 +73,42 @@
 | TC-023 | 引号突破后被 scheme 校验拦截 | `javascript:alert(1);" onerror="x` | null | 通过 | Formatter Mock | 安全 | ygpynet | 是 |
 | TC-024 | 空值拒绝 | 传入空格串 | null | 通过 | Formatter Mock | 单元 | ygpynet | 是 |
 
----
-
-## 3. 静态检查与构建（自动化，已执行）
+### 2.4 SlugHelper — slug 生成与唯一冲突重试（8 例，tests/SlugHelperTest.php）
 
 | 编号 | 用例描述 | 测试步骤 | 预期结果 | 实际结果 | 相关依赖 | 分类 | 负责人 | 自动化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-025 | 全量 PHP 语法检查 | 对 src/migrations/tests 全部 `php -l` | 无语法错误 | 通过：全部 OK | PHP 8.3 | 静态 | ygpynet | 是 |
-| TC-026 | Locale YAML 可解析 + en/zh 键一致 | Symfony Yaml 解析两个 locale 并 diff | 解析成功、无缺失键 | 通过：双语言 3 组顶层键、键集完全一致 | symfony/yaml | 兼容/可用性 | ygpynet | 是 |
-| TC-027 | 代码引用的翻译键完整性 | 提取 src/js 中 `ernestdefoe-giveaways.*` 键与 yml 比对 | 所有引用键均存在 | 通过：76 个引用键齐全（4 个为动态键/设置键误报） | — | 可用性 | ygpynet | 是 |
-| TC-028 | 扩展加载 + 容器 DI 冒烟 | 论坛根目录 `php flarum list` | 扩展命令注册、构造注入（含新增 ConnectionInterface）解析成功 | 通过：`giveaways:draw-due` 正常注册 | Flarum 容器 | 集成/冒烟 | ygpynet | 是 |
-| TC-029 | 前端生产构建 | `npm run build`（webpack production） | forum.js/admin.js 编译成功 | 通过：forum.js 29.3 KiB 编译成功 | Node 22, flarum-webpack-config | 构建 | ygpynet | 是 |
+| TC-056 | unique() 空位直接返回 base | `unique('New Giveaway', exists恒false)` | `new-giveaway` | 通过 | 无 | 单元 | ygpynet | 是 |
+| TC-057 | unique() 冲突时递增后缀 | 已占 `mega-prize`、`mega-prize-2` | `mega-prize-3` | 通过 | 无 | 单元/健壮性 | ygpynet | 是 |
+| TC-058 | base() 无 slug 字符回退 | `base('!!!')` / `base('!!!','category')` | `giveaway` / `category` | 通过 | Str::slug | 单元 | ygpynet | 是 |
+| TC-059 | isDuplicateKey 识别 MySQL 1062 | errorInfo[1]=1062 的 QueryException | true | 通过 | PDO 异常 | 单元/健壮性 | ygpynet | 是 |
+| TC-060 | isDuplicateKey 识别 SQLite UNIQUE | 消息含 `UNIQUE constraint failed` | true | 通过 | 异常消息 | 单元/健壮性 | ygpynet | 是 |
+| TC-061 | isDuplicateKey 其它错误不误判 | errorInfo[1]=1064 语法错误 | false | 通过 | 异常消息 | 单元/健壮性 | ygpynet | 是 |
+| TC-062 | saveWithUniqueSlug 冲突自动重试 | save 前 2 次抛 1062，第 3 次成功 | 重试 3 次、regenerate 调 2 次、成功返回 | 通过 | 无 | 单元/并发 | ygpynet | 是 |
+| TC-063 | saveWithUniqueSlug 非冲突异常重抛 | save 抛 1064 | 原异常原样抛出（不吞不重试） | 通过 | 无 | 单元/健壮性 | ygpynet | 是 |
+
+### 2.5 扩展配置 — 类引用完整性（3 例，tests/ExtensionConfigTest.php）
+
+| 编号 | 用例描述 | 测试步骤 | 预期结果 | 实际结果 | 相关依赖 | 分类 | 负责人 | 自动化 |
+|---|---|---|---|---|---|---|---|---|
+| TC-064 | extend.php 中 API 资源 endpoint 类均存在 | 反射读取 ApiResource endpoint 键并 class_exists | 所有类引用可加载 | 通过（曾捕获 `Endpoint\Index` 命名空间解析错误，见 BUG-03） | extend.php | 静态/回归 | ygpynet | 是 |
+| TC-065 | 注册的 Console 命令均为 Command 子类 | 读取 Console extender addCommands | 全部 `is_a(Command)` | 通过 | Symfony Console | 静态/回归 | ygpynet | 是 |
+| TC-066 | 所有 extender 均为合法 ExtenderInterface | 遍历 extend.php 返回值 instanceOf 断言 | 全部符合 | 通过 | Flarum Extend | 静态/回归 | ygpynet | 是 |
+
+---
+
+## 3. 静态检查、DI 冒烟与构建（自动化，已执行）
+
+| 编号 | 用例描述 | 测试步骤 | 预期结果 | 实际结果 | 相关依赖 | 分类 | 负责人 | 自动化 |
+|---|---|---|---|---|---|---|---|---|
+| TC-025 | 全量 PHP 语法检查 | 对 src/migrations/tests 全部 `php -l` | 无语法错误 | 通过：38 个文件全部 OK | PHP 8.3 | 静态 | ygpynet | 是 |
+| TC-026 | Locale YAML 可解析 + en/zh 键一致 | Symfony Yaml 解析两个 locale 并 diff | 解析成功、无缺失键 | 通过：en/zh 各 110 个扁平键，键集完全一致（含新增 composer_button、scheduler_*） | symfony/yaml | 兼容/可用性 | ygpynet | 是 |
+| TC-027 | 代码引用的翻译键完整性 | 提取 src/js 中 `ernestdefoe-giveaways.*` 键与 yml 比对 | 所有引用键均存在 | 通过：引用键齐全（4 个为动态键/设置键误报） | — | 可用性 | ygpynet | 是 |
+| TC-028 | 扩展加载 + CLI 命令注册 | 论坛根目录 `php flarum list` | 扩展命令注册、构造注入解析成功 | 通过：`giveaways` 命令组含 `giveaways:draw-due` 正常注册 | Flarum 容器 | 集成/冒烟 | ygpynet | 是 |
+| TC-029 | 前端生产构建 | `npm run build`（webpack production） | forum.js/admin.js 编译成功 | 通过：forum.js 30.3 KiB / admin.js 3.03 KiB 编译成功 | Node 22, flarum-webpack-config | 构建 | ygpynet | 是 |
 | TC-030 | 前端类型安全 | webpack 构建内嵌类型检查 | 无类型错误 | 通过（构建成功即含类型校验） | TS | 静态 | ygpynet | 是 |
+| TC-067 | 新控制器容器 DI 冒烟 | bootApp 后 make Health/DeleteGiveaway/DeleteCategoryController | 全部可解析 | 通过：health/delete-giveaway/delete-category 均解析成功 | Flarum 容器 | 集成/冒烟 | ygpynet | 是 |
+
+> 说明：TC-067 同时验证了 `HealthController`（注入 CacheRepository）、两个删除控制器（注入 ConnectionInterface）在真实容器中可装配。
 
 ---
 
@@ -94,7 +118,7 @@
 |---|---|---|---|---|---|---|---|---|
 | TC-031 | pick() 大参与池性能 | 1000/10000/50000 人池、抽 10 人，记录耗时 | 可接受（百毫秒内） | 通过：0.5ms / 5.3ms / 39.4ms（峰值内存 42MB） | PHP 8.3 | 性能 | ygpynet | 是 |
 
-> 风险提示：`pick()` 每槽位做 `array_sum(array_column())` 与 `array_splice()`，整体 O(slots × n)。5 万人 × 100 个中奖者估算约 400ms，可接受；超大规模社区（20 万人以上）建议改为预累计权重表优化。
+> 风险提示：`pick()` 每槽位做 `array_sum(array_column())` 与 `array_splice()`，整体 O(slots × n)。5 万人 × 100 个中奖者估算约 400ms，可接受；超大规模社区（20 万人以上）建议改为预累计权重表优化（RISK-01）。
 
 ---
 
@@ -119,6 +143,14 @@
 | TC-044 | 分类 CRUD 与归属 | 增删改分类、分类下挂抽奖 | 删除分类后其下抽奖变为未分类 | 未执行 | 功能 | ygpynet | 否 |
 | TC-045 | 帖子内 `[giveaway]` BBCode 渲染 + 徽章 | 发帖嵌入 `[giveaway slug=X]` | 帖子渲染抽奖卡片，列表显示抽奖徽章 | 未执行 | Formatter | 功能 | ygpynet | 否 |
 | TC-046 | 公平性可复算验证 | 用公布 seed + 参与者列表重跑 `pick()` 与 entrant_hash 比对 | 复算结果与公布 winners 完全一致 | 未执行（算法确定性已由 TC-004 自动验证） | 算法 | 公平性 | ygpynet | 否 |
+| TC-068 | slug 唯一冲突保存重试（集成） | 并发/先后创建两个同标题抽奖 | 后者 slug 自动追加 `-2` 后缀，两次均成功、无 500，`giveaways.slug` 唯一索引不冲突 | 未执行（生成/重试逻辑已由 TC-056~063 自动验证；保存路径经 SlugHelper::saveWithUniqueSlug） | MySQL 唯一索引 | 功能/并发 | ygpynet | 否 |
+| TC-069 | 删除抽奖事务原子性 | 删除含 entries/winners 的抽奖，并在删除中途人为制造失败 | 单事务内 entries/winners/giveaway 全删或全不删，不留孤儿记录 | 未执行（代码 review：`db->transaction` 包裹三段 delete；FK 级联兜底） | 事务 | 健壮性 | ygpynet | 否 |
+| TC-070 | 删除分类事务 | 删除挂有抽奖的分类 | 事务内先置空 category_id 再删分类，删除后无外键残留 | 未执行（代码 review：`db->transaction`） | 事务 | 健壮性 | ygpynet | 否 |
+| TC-071 | 列表 page 钳制 | `GET /api/giveaways?page=999`、`?page=0` | page 被钳制到真实范围（末页/第 1 页），不做深偏移扫描 | 未执行（代码 review：`min(page, ceil(total/perPage))`，已含 max(1) 下界） | MySQL | 健壮性 | ygpynet | 否 |
+| TC-072 | health 端点权限与内容 | 管理员 GET `/api/giveaways/health`；普通用户同请求 | 管理员 200 且 `scheduleLastRun` 为 ISO 时间或 null；非管理员 403 | 未执行（容器解析已过；`assertAdmin` + 读 `flarum:schedule:last_run` 缓存，路由先于 `/giveaways/{id}` 注册） | 权限/缓存 | 功能/安全 | ygpynet | 否 |
+| TC-073 | admin 调度器状态条 | 设置页查看 SchedulerStatus；删除缓存中的 last_run 再刷新 | 最近运行 ≤15min 显示绿色"运行正常"；未运行/超时显示黄色告警含 cron 提示 | 未执行（组件经 customSetting 注入设置页，不覆盖整页） | 前端/缓存 | 可用性 | ygpynet | 否 |
+| TC-074 | BBCode 卡片时间与实时倒计时 | 发帖含 `[giveaway]` 卡片；页面停留观察倒计时；翻页/加载新帖后观察 | 卡片渲染 `<time class="GiveawayCard-endsin" datetime=ISO>`；前端 MutationObserver 每秒刷新本地倒计时（`ends_in`/`ended`），与 React 卡片一致 | 未执行（模板改动需 `php flarum cache:clear` 刷新 formatter 缓存后验证） | Formatter/前端 | 功能/可用性 | ygpynet | 否 |
+| TC-075 | composer 按钮文案本地化 | 切换 en/zh 语言查看发帖编辑器按钮 | 分别为 "Post a giveaway" / "发布抽奖"（走 `forum.composer_button` 翻译） | 未执行（翻译键已加并经 TC-026 校验双语言一致） | locale | 可用性 | ygpynet | 否 |
 
 ---
 
@@ -150,13 +182,24 @@
 | 编号 | 严重度 | 说明 | 状态 |
 |---|---|---|---|
 | BUG-01 | 中 | 原 `pick()` 对 0/负数条目未归一化，与 `draw()` 构建池逻辑不一致 | 已修复（pick 内归一化），TC-007 验证 |
+| BUG-02 | 中 | `serializeToForum` 第 4 参被静默丢弃，导航默认不显示 | 已修复（`->default('...show_nav', true)`），提交 76784b0 |
+| BUG-03 | 中 | `Endpoint\Index::class` 被 `use Endpoint` 遮蔽解析到不存在类，讨论列表 `eagerLoad('firstPost')` 静默失效（N+1） | 已修复（改用 `Flarum\Api\Endpoint\Index`），并由 TC-064 防止复发 |
+| BUG-04 | 中 | 数字形式 slug 被 `ShowGiveawayController` 当作 id 查询，取错记录/404 | 已修复（slug 优先 + id 回退 + ModelNotFoundException） |
+| BUG-05 | 低 | 帖子卡片参与人数硬编码"人参与"，无法翻译 | 已修复（`entrants_label` 本地化），提交 76784b0 |
 | RISK-01 | 低 | `pick()` O(slots×n)，超大规模社区需优化 | 记录于 TC-031 |
 | RISK-02 | 低 | 公平性验证依赖参与者名单，当前不对外公开（与"可验证"承诺存在文档落差） | 建议后续提供名单查询接口 |
+| RISK-03 | 中 | 自动开奖依赖调度器，若未配置 cron 则静默失效 | 已缓解：新增 `/api/giveaways/health` + admin 状态条告警（TC-072/073），仍需部署配置 cron |
+| RISK-04 | 低 | 迁移在 SQLite/PostgreSQL 的可移植性未经实测 | 记录于 TC-054 |
 
 ---
 
 ## 9. 测试结论
 
-- **自动化测试：34/34 通过**（24 单元 + 4 静态 + 3 构建/冒烟 + 1 性能 + 2 安全）。
-- 上轮设计评审中的高优先级修复（开奖/参与竞态、URL scheme 白名单、错误透出、分页、时区、死代码）均有对应测试覆盖或代码级验证。
-- 20 个功能/集成/可用性用例因本次环境未启动 Web 服务与数据库而未执行，**建议部署后按 TC-032~TC-046、TC-052~TC-055 回归**。
+- **自动化测试：45/45 通过**（35 单元 + 5 静态/DI + 2 构建 + 1 性能 + 2 安全）。
+- 设计评审实施轮（提交 `1933473`）改动均有覆盖：
+  - SlugHelper（唯一冲突重试）→ TC-056~063（自动化）+ TC-068（集成）；
+  - 删除事务 → TC-069/070；page 钳制 → TC-071；
+  - 调度器状态（HealthController + SchedulerStatus）→ TC-072/073；
+  - BBCode 卡片实时倒计时 → TC-074；composer 按钮本地化 → TC-075。
+- 静态质量：lint 38/38 通过；PHPStan 剩余 27 条全部为 Eloquent/Flarum 魔法方法误报（无运行时错误）；前端 webpack 构建含类型检查通过。
+- 30 个功能/集成/可用性用例因本次环境未启动 Web 服务与数据库而未执行，**建议部署后按 TC-032~TC-046、TC-068~TC-075 及 TC-052~TC-055 回归**，其中 TC-074 前需执行 `php flarum cache:clear`。
