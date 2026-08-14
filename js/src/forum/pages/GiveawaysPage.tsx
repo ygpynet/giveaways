@@ -13,11 +13,14 @@ import CategoryManagerModal from '../components/CategoryManagerModal';
 
 export default class GiveawaysPage extends Page {
   loading = true;
+  loadingMore = false;
   giveaways: Giveaway[] = [];
   categories: GiveawayCategory[] = [];
   canCreate = false;
   canManage = false;
   filter: number | null = null;
+  page = 1;
+  hasMore = false;
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
@@ -26,20 +29,35 @@ export default class GiveawaysPage extends Page {
     this.loadCategories();
   }
 
-  load() {
+  load(reset = true) {
     this.loading = true;
-    listGiveaways()
+    if (reset) {
+      this.page = 1;
+      this.giveaways = [];
+    }
+    listGiveaways(this.page)
       .then((res) => {
-        this.giveaways = res.data || [];
+        const data = res.data || [];
+        this.giveaways = reset ? data : this.giveaways.concat(data);
         this.canCreate = !!(res.meta && res.meta.canCreate);
         this.canManage = !!(res.meta && res.meta.canManage);
+        this.hasMore = !!(res.meta && res.meta.hasMore);
         this.loading = false;
+        this.loadingMore = false;
         m.redraw();
       })
       .catch(() => {
         this.loading = false;
+        this.loadingMore = false;
         m.redraw();
       });
+  }
+
+  loadMore() {
+    if (this.loadingMore || this.loading) return;
+    this.loadingMore = true;
+    this.page += 1;
+    this.load(false);
   }
 
   loadCategories() {
@@ -113,7 +131,7 @@ export default class GiveawaysPage extends Page {
             </div>
           )}
 
-          {this.loading ? (
+          {this.loading && !this.loadingMore ? (
             <LoadingIndicator />
           ) : filtered.length === 0 ? (
             <div className="GiveawaysPage-empty">
@@ -146,6 +164,18 @@ export default class GiveawaysPage extends Page {
                 </section>
               ),
             ]
+          )}
+
+          {this.hasMore && (
+            <div className="GiveawaysPage-loadMore">
+              <Button
+                className="Button Button--block"
+                loading={this.loadingMore}
+                onclick={() => this.loadMore()}
+              >
+                {app.translator.trans('ernestdefoe-giveaways.forum.load_more')}
+              </Button>
+            </div>
           )}
         </div>
       </div>

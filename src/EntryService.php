@@ -5,6 +5,7 @@ namespace ErnestDefoe\Giveaways;
 use Carbon\Carbon;
 use Flarum\Locale\TranslatorInterface;
 use Flarum\User\User;
+use Illuminate\Database\QueryException;
 
 /** Creates base entries and awards bonus entries, enforcing eligibility. */
 class EntryService
@@ -48,7 +49,16 @@ class EntryService
         $entry->sources = json_encode(['base' => 1]);
         $entry->created_at = Carbon::now();
         $entry->updated_at = Carbon::now();
-        $entry->save();
+
+        try {
+            $entry->save();
+        } catch (QueryException $e) {
+            // A concurrent identical insert beat us to it and hit the unique
+            // (giveaway_id, user_id) constraint — fetch the existing row
+            // instead of surfacing a 500 to the user.
+            $entry = GiveawayEntry::query()
+                ->where('giveaway_id', $giveaway->id)->where('user_id', $user->id)->firstOrFail();
+        }
 
         return $entry;
     }

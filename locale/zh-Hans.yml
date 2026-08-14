@@ -10,6 +10,7 @@ ernestdefoe-giveaways:
     enter_min_posts: "您需要至少发帖 {count} 条才能参与。"
     enter_too_new: "您的账号注册时间太短，无法参与此抽奖。"
     claim_not_winner: "您不是此抽奖活动的获奖者。"
+    action_failed: "操作失败，请稍后再试。"
   forum:
     nav: 抽奖活动
     page_title: 抽奖活动
@@ -19,6 +20,7 @@ ernestdefoe-giveaways:
     empty: "暂无抽奖活动，过段时间再来看看吧！"
     active_heading: "正在进行"
     past_heading: "往期抽奖"
+    load_more: "加载更多"
     ends_in: "{time} 后结束"
     ended: 已结束
     starts_in: "{time} 后开始"

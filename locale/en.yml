@@ -11,6 +11,7 @@ ernestdefoe-giveaways:
     enter_min_posts: "You need at least {count} posts to enter."
     enter_too_new: Your account is too new to enter this giveaway.
     claim_not_winner: You're not a winner of this giveaway.
+    action_failed: Something went wrong. Please try again later.
 
   forum:
     # Navigation & page titles
@@ -22,6 +23,7 @@ ernestdefoe-giveaways:
     empty: No giveaways right now. Check back soon!
     active_heading: Open now
     past_heading: Past giveaways
+    load_more: Load more
 
     # Card / status
     ends_in: "Ends in {time}"

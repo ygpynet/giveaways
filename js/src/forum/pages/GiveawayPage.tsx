@@ -23,6 +23,7 @@ export default class GiveawayPage extends Page {
   loading = true;
   entering = false;
   claiming = false;
+  drawing = false;
   giveaway: Giveaway | null = null;
 
   oninit(vnode: Mithril.Vnode) {
@@ -68,8 +69,9 @@ export default class GiveawayPage extends Page {
         );
         m.redraw();
       })
-      .catch(() => {
+      .catch((err) => {
         this.entering = false;
+        this.showError(err);
         m.redraw();
       });
   }
@@ -77,6 +79,7 @@ export default class GiveawayPage extends Page {
   draw() {
     const g = this.giveaway!;
     if (
+      this.drawing ||
       !confirm(
         app.translator.trans(
           "ernestdefoe-giveaways.forum.confirm_draw",
@@ -84,10 +87,18 @@ export default class GiveawayPage extends Page {
       )
     )
       return;
-    drawGiveaway(g.id).then((res) => {
-      this.giveaway = res.data;
-      m.redraw();
-    });
+    this.drawing = true;
+    drawGiveaway(g.id)
+      .then((res) => {
+        this.giveaway = res.data;
+        this.drawing = false;
+        m.redraw();
+      })
+      .catch((err) => {
+        this.drawing = false;
+        this.showError(err);
+        m.redraw();
+      });
   }
 
   claim() {
@@ -103,10 +114,20 @@ export default class GiveawayPage extends Page {
         );
         m.redraw();
       })
-      .catch(() => {
+      .catch((err) => {
         this.claiming = false;
+        this.showError(err);
         m.redraw();
       });
+  }
+
+  /** Show the server's localized error detail when present, else a generic message. */
+  showError(err: unknown) {
+    const detail = (err as any)?.errors?.[0]?.detail;
+    app.alerts.show(
+      { type: "error" },
+      detail || app.translator.trans("ernestdefoe-giveaways.api.action_failed"),
+    );
   }
 
   edit() {
@@ -500,6 +521,7 @@ export default class GiveawayPage extends Page {
           <Button
             className="Button Button--block"
             icon="fas fa-dice"
+            loading={this.drawing}
             onclick={() => this.draw()}
           >
             {app.translator.trans("ernestdefoe-giveaways.forum.draw_now")}

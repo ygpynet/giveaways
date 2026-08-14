@@ -141,6 +141,11 @@ public function __construct(
         $v = str_replace(['"', "'", '(', ')', '\\', "\n", "\r", "\t", ' '], '', $v);
 
         $ok = filter_var($v, FILTER_VALIDATE_URL) || (str_starts_with($v, '/') && ! str_starts_with($v, '//'));
+        if ($ok && ! str_starts_with($v, '/')) {
+            // Only http(s) ever reaches a url("...") context; javascript:, data:,
+            // file: etc. are rejected outright as defense-in-depth.
+            $ok = in_array(strtolower((string) parse_url($v, PHP_URL_SCHEME)), ['http', 'https'], true);
+        }
         return $ok ? mb_substr($v, 0, 600) : null;
     }
 

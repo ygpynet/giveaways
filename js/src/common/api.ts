@@ -63,15 +63,22 @@ export interface Giveaway {
 
 export interface ListResult {
   data: Giveaway[];
-  meta: { canCreate: boolean; canManage: boolean };
+  meta: {
+    canCreate: boolean;
+    canManage: boolean;
+    page?: number;
+    hasMore?: boolean;
+    total?: number;
+  };
 }
 
 function base(): string {
   return app.forum.attribute("apiUrl") + "/giveaways";
 }
 
-export function listGiveaways(): Promise<ListResult> {
-  return app.request<ListResult>({ method: "GET", url: base() });
+export function listGiveaways(page: number = 1): Promise<ListResult> {
+  const q = page > 1 ? `?page=${page}` : "";
+  return app.request<ListResult>({ method: "GET", url: base() + q });
 }
 
 export function showGiveaway(

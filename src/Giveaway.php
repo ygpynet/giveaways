@@ -76,7 +76,6 @@ class Giveaway extends AbstractModel
             'post_bonus'         => 0,   // bonus entries for posting during the window (0 = off)
             'min_posts'          => 0,
             'min_age_days'       => 0,
-            'announce'           => true,
             'claim_instructions' => '',  // shown to winners when they claim their prize
         ], $s);
     }
@@ -87,10 +86,5 @@ class Giveaway extends AbstractModel
         return $this->status === 'active'
             && (! $this->starts_at || $this->starts_at->lte($now))
             && $this->ends_at->gt($now);
-    }
-
-    public function hasEnded(): bool
-    {
-        return $this->ends_at->lte(Carbon::now());
     }
 }

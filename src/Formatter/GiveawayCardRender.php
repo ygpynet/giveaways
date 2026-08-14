@@ -3,6 +3,7 @@
 namespace ErnestDefoe\Giveaways\Formatter;
 
 use ErnestDefoe\Giveaways\Giveaway;
+use Flarum\Foundation\Config;
 use Flarum\Http\UrlGenerator;
 use Flarum\Locale\TranslatorInterface;
 use s9e\TextFormatter\Renderer;
@@ -11,7 +12,8 @@ class GiveawayCardRender
 {
     public function __construct(
         protected UrlGenerator $url,
-        protected TranslatorInterface $translator
+        protected TranslatorInterface $translator,
+        protected Config $config
     ) {
     }
 
@@ -51,7 +53,7 @@ class GiveawayCardRender
             .' categoryicon="'.($category ? $this->xml((string) $category->icon) : '').'"'
             .' title="'.$this->xml($g->title).'"'
             .' prize="'.$this->xml($g->prize).'"'
-            .' endsin="'.$this->xml($g->ends_at->format('Y-m-d H:i')).'"'
+            .' endsin="'.$this->xml($g->ends_at->setTimezone($this->config['app.timezone'])->format('Y-m-d H:i')).'"'
             .' entrants="'.(int) $g->entries()->count().'"'
             .'/>';
     }
