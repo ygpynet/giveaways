@@ -37,7 +37,7 @@ class GiveawayCardConfigure
     <h3 class="GiveawayCard-title">{@title}</h3>
     <div class="GiveawayCard-prize"><i class="icon fas fa-trophy" aria-hidden="true"></i> {@prize}</div>
     <div class="GiveawayCard-meta">
-      <span><i class="icon fas fa-clock" aria-hidden="true"></i> {@endsin}</span>
+      <span><i class="icon fas fa-clock" aria-hidden="true"></i> <time class="GiveawayCard-endsin" datetime="{@endsin_iso}">{@endsin}</time></span>
       <span><i class="icon fas fa-users" aria-hidden="true"></i> {@entrants} {@entrantslabel}</span>
     </div>
   </div>

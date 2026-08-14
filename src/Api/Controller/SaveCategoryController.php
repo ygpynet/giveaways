@@ -4,11 +4,11 @@ namespace ErnestDefoe\Giveaways\Api\Controller;
 
 use Carbon\Carbon;
 use ErnestDefoe\Giveaways\GiveawayCategory;
+use ErnestDefoe\Giveaways\Support\SlugHelper;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\Locale\TranslatorInterface;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,13 +54,16 @@ class SaveCategoryController implements RequestHandlerInterface
         }
 
         if (! $cat->slug || array_key_exists('name', $attrs)) {
-            $cat->slug = $this->uniqueSlug($cat->name, $cat->id);
+            $cat->slug = SlugHelper::unique($cat->name, fn ($s) => $this->slugExists($s, $cat->id), 'category');
         }
         if (! $id) {
             $cat->created_at = Carbon::now();
         }
         $cat->updated_at = Carbon::now();
-        $cat->save();
+        SlugHelper::saveWithUniqueSlug(
+            fn () => $cat->save(),
+            fn () => $cat->slug = SlugHelper::unique($cat->name, fn ($s) => $this->slugExists($s, $cat->id), 'category')
+        );
 
         return new JsonResponse([
             'data' => [
@@ -75,14 +78,10 @@ class SaveCategoryController implements RequestHandlerInterface
         ], $id ? 200 : 201);
     }
 
-    private function uniqueSlug(string $name, $ignoreId = null): string
+    private function slugExists(string $slug, $ignoreId): bool
     {
-        $base = Str::slug($name) ?: 'category';
-        $slug = $base;
-        $i = 2;
-        while (GiveawayCategory::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
-            $slug = $base . '-' . $i++;
-        }
-        return $slug;
+        return GiveawayCategory::where('slug', $slug)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
     }
 }

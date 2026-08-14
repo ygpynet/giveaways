@@ -56,7 +56,10 @@ export default function init() {
               });
             },
           },
-          m("span.TagLabel.untagged", "发布抽奖"),
+          m(
+            "span.TagLabel.untagged",
+            app.translator.trans("ernestdefoe-giveaways.forum.composer_button") as string,
+          ),
         ),
         5,
       );

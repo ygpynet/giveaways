@@ -73,6 +73,7 @@ ernestdefoe-giveaways:
       name_placeholder: "分类名称"
       confirm_delete: "确定删除此分类？该分类下的抽奖活动将变为未分类状态。"
     create: "发布抽奖"
+    composer_button: "发布抽奖"
     edit: 编辑
     delete: 删除
     draw_now: "开奖"
@@ -111,3 +112,6 @@ ernestdefoe-giveaways:
     nav_label_setting: "导航栏文本"
     nav_label_help: "在论坛导航栏中显示的抽奖页面名称。"
     show_nav_setting: "在主导航栏中显示“抽奖活动”链接"
+    scheduler_checking: "正在检查调度器状态…"
+    scheduler_ok: "调度器运行正常（最近一次运行：{time}）。"
+    scheduler_stale: "调度器已超过 15 分钟未运行，自动开奖可能失效。请配置 cron 每分钟执行 `php flarum schedule:run`。"

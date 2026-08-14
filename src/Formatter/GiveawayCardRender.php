@@ -53,6 +53,7 @@ class GiveawayCardRender
             .' categoryicon="'.($category ? $this->xml((string) $category->icon) : '').'"'
             .' title="'.$this->xml($g->title).'"'
             .' prize="'.$this->xml($g->prize).'"'
+            .' endsin_iso="'.$this->xml($g->ends_at->toIso8601String()).'"'
             .' endsin="'.$this->xml($g->ends_at->setTimezone($this->config['app.timezone'])->format('Y-m-d H:i')).'"'
             .' entrants="'.(int) $g->entries()->count().'"'
             .' entrantslabel="'.$this->xml($this->translator->trans('ernestdefoe-giveaways.forum.entrants_label')).'"'

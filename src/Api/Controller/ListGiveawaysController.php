@@ -27,6 +27,11 @@ class ListGiveawaysController implements RequestHandlerInterface
             ->orderBy('ends_at', 'desc');
 
         $total = (clone $query)->count();
+
+        // Clamp the requested page to the real range so a huge ?page=N can't
+        // force the DB into an expensive deep-offset scan.
+        $page = max(1, min($page, max(1, (int) ceil($total / $perPage))));
+
         $giveaways = $query->offset(($page - 1) * $perPage)->limit($perPage)->get();
 
         // Batch-load per-row aggregates + the actor's own entry/win once (no N+1).

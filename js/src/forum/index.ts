@@ -11,6 +11,7 @@ import Giveaway from "../common/models/Giveaway";
 import initComposerGiveaway from "./overrides/DiscussionComposerGiveaway";
 import Discussion from "flarum/common/models/Discussion";
 import Badge from "flarum/common/components/Badge";
+import { countdown } from "../common/format";
 
 initComposerGiveaway();
 
@@ -68,6 +69,8 @@ app.initializers.add("ernestdefoe-giveaways", () => {
       5,
     );
   });
+
+  enhanceGiveawayCardCountdowns();
 });
 
 document.addEventListener("click", (e) => {
@@ -81,3 +84,61 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   m.route.set(href);
 });
+
+/**
+ * Upgrade the server-rendered BBCode card's static end time into a live
+ * browser-local countdown, matching the React <GiveawayCard>. Each <time> gets
+ * one interval; a MutationObserver picks up cards injected after the initial
+ * render (post loading, pagination, ...).
+ */
+function enhanceGiveawayCardCountdowns() {
+  document
+    .querySelectorAll<HTMLTimeElement>("time.GiveawayCard-endsin[datetime]")
+    .forEach((el) => {
+      const iso = el.getAttribute("datetime");
+      if (!iso) return;
+
+      const stop = (el as any)._gvEndsinTick;
+      if (typeof stop === "function") stop();
+
+      const tick = () => {
+        const secs = Math.floor((new Date(iso).getTime() - Date.now()) / 1000);
+        const text =
+          secs <= 0
+            ? (app.translator.trans("ernestdefoe-giveaways.forum.ended") as string)
+            : (app.translator.trans("ernestdefoe-giveaways.forum.ends_in", {
+                time: countdown(iso),
+              }) as string);
+        if (el.textContent !== text) el.textContent = text;
+      };
+
+      tick();
+      const handle = setInterval(tick, 1000);
+      (el as any)._gvEndsinTick = () => clearInterval(handle);
+    });
+}
+
+function hasGiveawayCard(node: Node): boolean {
+  return (
+    node instanceof Element &&
+    (node.matches?.(".GiveawayCard, .GiveawayCard-endsin") ||
+      !!node.querySelector?.(".GiveawayCard-endsin"))
+  );
+}
+
+const observer = new MutationObserver((mutations) => {
+  for (const m of mutations) {
+    if (m.addedNodes.length && [...m.addedNodes].some(hasGiveawayCard)) {
+      enhanceGiveawayCardCountdowns();
+      return;
+    }
+  }
+});
+
+if (document.body) {
+  observer.observe(document.body, { childList: true, subtree: true });
+} else {
+  document.addEventListener("DOMContentLoaded", () =>
+    observer.observe(document.body, { childList: true, subtree: true }),
+  );
+}

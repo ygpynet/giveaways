@@ -92,6 +92,7 @@ ernestdefoe-giveaways:
 
     # Create / edit
     create: New giveaway
+    composer_button: Post a giveaway
     edit: Edit
     delete: Delete
     draw_now: Draw now
@@ -132,3 +133,6 @@ ernestdefoe-giveaways:
     nav_label_setting: Navigation label
     nav_label_help: The text shown in the forum navigation for the giveaways page.
     show_nav_setting: Show a "Giveaways" link in the main navigation
+    scheduler_checking: Checking scheduler status…
+    scheduler_ok: "Scheduler is running normally (last run: {time})."
+    scheduler_stale: "The scheduler has not run in over 15 minutes — automatic draws may be stalled. Make sure cron runs `php flarum schedule:run` every minute."

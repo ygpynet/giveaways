@@ -1,10 +1,12 @@
 import app from 'flarum/admin/app';
 import Extend from 'flarum/common/extenders';
+import SchedulerStatus from './components/SchedulerStatus';
 
 const KEY = 'ernestdefoe-giveaways.';
 
 export const extend = [
   new Extend.Admin()
+    .customSetting(() => SchedulerStatus.component({}), 100)
     .setting(() => ({
       setting: KEY + 'show_nav',
       type: 'boolean',

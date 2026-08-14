@@ -44,6 +44,7 @@ return [
         ->serializeToForum('giveawaysShowNav', 'ernestdefoe-giveaways.show_nav', 'boolval'),
 
     (new Extend\Routes('api'))
+        ->get('/giveaways/health', 'giveaways.health', Controller\HealthController::class)
         ->get('/giveaways', 'giveaways.index', Controller\ListGiveawaysController::class)
         ->get('/giveaways/{id}', 'giveaways.show', Controller\ShowGiveawayController::class)
         ->post('/giveaways', 'giveaways.create', Controller\SaveGiveawayController::class)
@@ -80,7 +81,7 @@ return [
         return [
             Schema\Boolean::make('hasGiveaway')
                 ->get(function (Discussion $discussion) {
-                    return (bool) preg_match('/\[giveaway slug=/', (string) ($discussion->firstPost?->content ?? ''));
+                    return (bool) preg_match('/\[giveaway slug=/', (string) ($discussion->firstPost->content ?? ''));
                 }),
         ];
     }),

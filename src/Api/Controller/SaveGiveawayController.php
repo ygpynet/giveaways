@@ -5,11 +5,11 @@ namespace ErnestDefoe\Giveaways\Api\Controller;
 use Carbon\Carbon;
 use ErnestDefoe\Giveaways\Api\GiveawayPresenter;
 use ErnestDefoe\Giveaways\Giveaway;
+use ErnestDefoe\Giveaways\Support\SlugHelper;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\Locale\TranslatorInterface;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -101,13 +101,16 @@ public function __construct(
         }
 
         if (! $g->slug || array_key_exists('title', $attrs)) {
-            $g->slug = $this->uniqueSlug($g->title, $g->id);
+            $g->slug = SlugHelper::unique($g->title, fn ($s) => $this->slugExists($s, $g->id));
         }
         if (! $id) {
             $g->created_at = Carbon::now();
         }
         $g->updated_at = Carbon::now();
-        $g->save();
+        SlugHelper::saveWithUniqueSlug(
+            fn () => $g->save(),
+            fn () => $g->slug = SlugHelper::unique($g->title, fn ($s) => $this->slugExists($s, $g->id))
+        );
         $g->load(['user', 'category']);
 
         return new JsonResponse(['data' => GiveawayPresenter::forActor($actor)->present($g, true)], $id ? 200 : 201);
@@ -149,14 +152,10 @@ public function __construct(
         return $ok ? mb_substr($v, 0, 600) : null;
     }
 
-    private function uniqueSlug(string $title, $ignoreId = null): string
+    private function slugExists(string $slug, $ignoreId): bool
     {
-        $base = Str::slug($title) ?: 'giveaway';
-        $slug = $base;
-        $i = 2;
-        while (Giveaway::where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
-            $slug = $base . '-' . $i++;
-        }
-        return $slug;
+        return Giveaway::where('slug', $slug)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
     }
 }
