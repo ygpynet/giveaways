@@ -17,6 +17,7 @@ use Flarum\Post\Event\Posted;
 use Illuminate\Console\Scheduling\Event as ScheduledEvent;
 use Flarum\Api\Resource\DiscussionResource;
 use Flarum\Api\Endpoint\Endpoint;
+use Flarum\Api\Endpoint\Index;
 use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
 
@@ -39,7 +40,8 @@ return [
 
     (new Extend\Settings())
         ->serializeToForum('giveawaysNavLabel', 'ernestdefoe-giveaways.nav_label')
-        ->serializeToForum('giveawaysShowNav', 'ernestdefoe-giveaways.show_nav', 'boolval', true),
+        ->default('ernestdefoe-giveaways.show_nav', true)
+        ->serializeToForum('giveawaysShowNav', 'ernestdefoe-giveaways.show_nav', 'boolval'),
 
     (new Extend\Routes('api'))
         ->get('/giveaways', 'giveaways.index', Controller\ListGiveawaysController::class)
@@ -71,7 +73,7 @@ return [
         }),
     
     (new Extend\ApiResource(DiscussionResource::class))
-    ->endpoint(Endpoint\Index::class, function (Endpoint $endpoint) {
+    ->endpoint(Index::class, function (Endpoint $endpoint) {
         return $endpoint->eagerLoad('firstPost');
     })
     ->fields(function () {

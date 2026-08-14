@@ -12,6 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $user_id
  * @property int $entries
  * @property string|null $sources
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property \ErnestDefoe\Giveaways\Giveaway $giveaway
+ * @property \Flarum\User\User $user
  */
 class GiveawayEntry extends AbstractModel
 {

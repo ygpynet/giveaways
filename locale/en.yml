@@ -30,6 +30,7 @@ ernestdefoe-giveaways:
     ended: Ended
     starts_in: "Starts in {time}"
     entrants: "{count} entrants"
+    entrants_label: participants
     your_entries: "You have {count} {count, plural, one {entry} other {entries}}"
     winners_count: "{count} {count, plural, one {winner} other {winners}}"
     status_active: Open

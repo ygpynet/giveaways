@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $slug
  * @property string $prize
  * @property string|null $description
+ * @property string|null $description_html
  * @property string|null $cover_url
  * @property int $winner_count
  * @property string $status
@@ -25,6 +26,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $entrant_hash
  * @property \Carbon\Carbon|null $drawn_at
  * @property int|null $category_id
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property \Flarum\User\User|null $user
+ * @property \ErnestDefoe\Giveaways\GiveawayCategory|null $category
  */
 class Giveaway extends AbstractModel
 {

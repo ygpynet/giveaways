@@ -25,6 +25,7 @@ ernestdefoe-giveaways:
     ended: 已结束
     starts_in: "{time} 后开始"
     entrants: "{count} 人参与"
+    entrants_label: 人参与
     your_entries: "您拥有 {count} 个抽奖条目"
     winners_count: "{count} 名获奖者"
     status_active: 进行中
