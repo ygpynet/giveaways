@@ -21,7 +21,7 @@ class EntryService
             return $this->translator->trans('ernestdefoe-giveaways.api.enter_login');
         }
         if (! $giveaway->isRunning()) {
-            return $this->translator->trans('ernestdefoe-giveaways.api.enter_closed');
+            return $this->closedReason($giveaway);
         }
         $s = $giveaway->settingsArray();
         if (($s['min_posts'] ?? 0) > 0 && (int) $user->comment_count < (int) $s['min_posts']) {
@@ -31,6 +31,26 @@ class EntryService
             return $this->translator->trans('ernestdefoe-giveaways.api.enter_too_new');
         }
         return null;
+    }
+
+    /**
+     * Why a non-running giveaway is closed. A giveaway whose status is still
+     * 'active' can be closed because its window simply hasn't opened yet, or
+     * because it has already ended — those read very differently to a user,
+     * so they get their own messages.
+     */
+    protected function closedReason(Giveaway $giveaway): string
+    {
+        if ($giveaway->status === 'drawn') {
+            return $this->translator->trans('ernestdefoe-giveaways.api.enter_drawn');
+        }
+        if ($giveaway->status === 'cancelled') {
+            return $this->translator->trans('ernestdefoe-giveaways.api.enter_cancelled');
+        }
+        if ($giveaway->starts_at && $giveaway->starts_at->gt(Carbon::now())) {
+            return $this->translator->trans('ernestdefoe-giveaways.api.enter_closed');
+        }
+        return $this->translator->trans('ernestdefoe-giveaways.api.enter_ended');
     }
 
     /** Idempotent base entry. Caller should check ineligibleReason() first. */

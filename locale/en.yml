@@ -7,7 +7,10 @@ ernestdefoe-giveaways:
     ends_future: The end must be in the future.
     category_name_required: A category name is required.
     enter_login: You must be logged in to enter.
-    enter_closed: This giveaway is not open for entries.
+    enter_closed: This giveaway hasn't started yet.
+    enter_ended: This giveaway has ended.
+    enter_drawn: This giveaway has already been drawn.
+    enter_cancelled: This giveaway has been cancelled.
     enter_min_posts: "You need at least {count} posts to enter."
     enter_too_new: Your account is too new to enter this giveaway.
     claim_not_winner: You're not a winner of this giveaway.
@@ -58,6 +61,11 @@ ernestdefoe-giveaways:
     req_min_posts: "At least {count} {count, plural, one {post} other {posts}}"
     req_min_age: "Account at least {count} {count, plural, one {day} other {days}} old"
     no_requirements: Open to all members
+    open_to_members: Open to all members
+    open_to_everyone: Open to everyone
+    open_to_groups: "Open to {groups}"
+    open_to_admins: Admins only
+    group_separator: ", "
     winners_label: Winners
     not_drawn_yet: Winners haven't been drawn yet.
     no_winners: No eligible entrants — no winners were drawn.

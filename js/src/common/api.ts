@@ -30,6 +30,13 @@ export interface GiveawayCategory {
   count?: number;
 }
 
+export interface GiveawayGroup {
+  id: number;
+  name: string;
+  namePlural: string;
+  color: string | null;
+}
+
 export interface Giveaway {
   id: number;
   title: string;
@@ -52,6 +59,8 @@ export interface Giveaway {
   minPosts: number;
   minAgeDays: number;
   canManage: boolean;
+  canViewEntries: boolean;
+  enterGroups: GiveawayGroup[];
   iWon: boolean;
   myClaimedAt: string | null;
   claimInstructions: string | null;
@@ -115,6 +124,7 @@ export function listEntries(id: number, page: number = 1): Promise<EntriesResult
   return app.request<EntriesResult>({
     method: "GET",
     url: `${base()}/${id}/entries` + q,
+    errorHandler: () => {},
   });
 }
 

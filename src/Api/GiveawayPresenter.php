@@ -5,6 +5,9 @@ namespace ErnestDefoe\Giveaways\Api;
 use ErnestDefoe\Giveaways\Giveaway;
 use ErnestDefoe\Giveaways\GiveawayEntry;
 use ErnestDefoe\Giveaways\GiveawayWinner;
+use Flarum\Group\Group;
+use Flarum\Group\Permission;
+use Flarum\Locale\TranslatorInterface;
 use Flarum\User\User;
 use Illuminate\Support\Collection;
 
@@ -34,6 +37,8 @@ class GiveawayPresenter
         protected ?Collection $myWins = null,
         protected ?Collection $aggregates = null
     ) {}
+
+    protected ?array $enterGroups = null;
 
     /** A presenter for a single giveaway (per-row lookups are fine for one row). */
     public static function forActor(User $actor): self
@@ -98,6 +103,7 @@ class GiveawayPresenter
             'minAgeDays'   => (int) ($s['min_age_days'] ?? 0),
             'canManage'    => $canManage,
             'canViewEntries' => $canManage || $this->actor->hasPermission('giveaways.viewEntries'),
+            'enterGroups'  => $this->enterGroups(),
             'iWon'         => (bool) $myWin,
             'myClaimedAt'  => $myWin ? optional($myWin->claimed_at)->toIso8601String() : null,
             // Instructions are only meaningful to winners and managers.
@@ -124,6 +130,61 @@ class GiveawayPresenter
         }
 
         return $data;
+    }
+
+    /**
+     * Groups granted the `giveaways.enter` permission. Administrators are not
+     * listed — Flarum's isAdmin bypasses every permission check, so they can
+     * always participate without being granted anything. Names are localized
+     * the same way the admin permission grid localizes them (locale key
+     * `core.group.{lowercased name}`, e.g. mod → 版主), and groups are ordered
+     * like the admin grid's group dropdown (by position, unpositioned last).
+     * Guests and Members are special — they're rendered as "everyone" /
+     * "all members". Cached once per request: this is forum-global, not per
+     * giveaway, so it avoids repeating the query for every row.
+     *
+     * @return array<int, array{id: int, name: string, namePlural: string, color: string|null}>
+     */
+    protected function enterGroups(): array
+    {
+        if ($this->enterGroups !== null) {
+            return $this->enterGroups;
+        }
+
+        $ids = Permission::query()
+            ->where('permission', 'giveaways.enter')
+            ->orderBy('group_id')
+            ->pluck('group_id')
+            ->all();
+
+        $translator = resolve(TranslatorInterface::class);
+
+        $this->enterGroups = Group::query()
+            ->whereIn('id', $ids)
+            ->orderByRaw('position IS NULL')
+            ->orderBy('position')
+            ->orderBy('id')
+            ->get(['id', 'name_singular', 'name_plural', 'color'])
+            ->map(function (Group $group) use ($translator) {
+                return [
+                    'id'         => (int) $group->id,
+                    'name'       => $this->translateGroupName($group->name_singular, $translator),
+                    'namePlural' => $this->translateGroupName($group->name_plural, $translator),
+                    'color'      => $group->color,
+                ];
+            })
+            ->all();
+
+        return $this->enterGroups;
+    }
+
+    /** Mirror of GroupResource::translateGroupName — localize standard groups, keep custom names. */
+    private function translateGroupName(string $name, TranslatorInterface $translator): string
+    {
+        $key = 'core.group.'.strtolower($name);
+        $translation = $translator->trans($key);
+
+        return $translation === $key ? $name : $translation;
     }
 
     protected function myEntry(Giveaway $g): ?GiveawayEntry

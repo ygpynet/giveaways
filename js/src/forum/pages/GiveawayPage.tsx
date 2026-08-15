@@ -6,7 +6,6 @@ import Button from "flarum/common/components/Button";
 import Link from "flarum/common/components/Link";
 import Icon from "flarum/common/components/Icon";
 import humanTime from "flarum/common/helpers/humanTime";
-import LogInModal from "flarum/forum/components/LogInModal";
 
 import {
   showGiveaway,
@@ -16,7 +15,7 @@ import {
   claimGiveaway,
   listEntries,
 } from "../../common/api";
-import type { Giveaway, GiveawayEntrant } from "../../common/api";
+import type { Giveaway, GiveawayEntrant, GiveawayGroup } from "../../common/api";
 import { countdown } from "../../common/format";
 import GiveawayFormModal from "../components/GiveawayFormModal";
 
@@ -53,7 +52,9 @@ export default class GiveawayPage extends Page {
         this.entrantPage = 1;
         this.entrantHasMore = false;
         this.entrantTotal = null;
-        this.loadEntries();
+        if (this.giveaway.canViewEntries) {
+          this.loadEntries();
+        }
         m.redraw();
       })
       .catch(() => {
@@ -83,7 +84,9 @@ export default class GiveawayPage extends Page {
   enter() {
     const g = this.giveaway!;
     if (!app.session.user) {
-      app.modal.show(LogInModal);
+      // LogInModal 是核心懒加载 chunk，必须点击时才通过 asyncModuleImport 加载，
+      // 顶层静态 import 会在 chunk 就绪前解析成 undefined。
+      app.modal.show(() => flarum.reg.asyncModuleImport("flarum/forum/components/LogInModal"));
       return;
     }
     this.entering = true;
@@ -97,9 +100,8 @@ export default class GiveawayPage extends Page {
         );
         m.redraw();
       })
-      .catch((err) => {
+      .catch(() => {
         this.entering = false;
-        this.showError(err);
         m.redraw();
       });
   }
@@ -122,9 +124,8 @@ export default class GiveawayPage extends Page {
         this.drawing = false;
         m.redraw();
       })
-      .catch((err) => {
+      .catch(() => {
         this.drawing = false;
-        this.showError(err);
         m.redraw();
       });
   }
@@ -142,20 +143,10 @@ export default class GiveawayPage extends Page {
         );
         m.redraw();
       })
-      .catch((err) => {
+      .catch(() => {
         this.claiming = false;
-        this.showError(err);
         m.redraw();
       });
-  }
-
-  /** Show the server's localized error detail when present, else a generic message. */
-  showError(err: unknown) {
-    const detail = (err as any)?.errors?.[0]?.detail;
-    app.alerts.show(
-      { type: "error" },
-      detail || app.translator.trans("ernestdefoe-giveaways.api.action_failed"),
-    );
   }
 
   edit() {
@@ -323,7 +314,11 @@ export default class GiveawayPage extends Page {
   }
 
   requirementsBlock(g: Giveaway): Mithril.Children {
-    const reqs: Mithril.Children[] = [];
+    const reqs: Mithril.Children[] = [
+      <li>
+        <Icon name="fas fa-users" /> {this.audienceLabel(g.enterGroups)}
+      </li>,
+    ];
     if (g.minPosts > 0)
       reqs.push(
         <li>
@@ -350,20 +345,38 @@ export default class GiveawayPage extends Page {
             "ernestdefoe-giveaways.forum.requirements_label",
           )}
         </h2>
-        <ul className="GiveawayPage-reqs">
-          {reqs.length ? (
-            reqs
-          ) : (
-            <li>
-              <Icon name="fas fa-check" />{" "}
-              {app.translator.trans(
-                "ernestdefoe-giveaways.forum.no_requirements",
-              )}
-            </li>
-          )}
-        </ul>
+        <ul className="GiveawayPage-reqs">{reqs}</ul>
       </section>
     );
+  }
+
+  /** Human description of who may enter, derived from the admin permission grid. */
+  audienceLabel(groups: GiveawayGroup[]): string {
+    const ids = groups.map((group) => group.id);
+    if (ids.includes(2)) {
+      // Guests granted → everyone, guests included.
+      return app.translator.trans(
+        "ernestdefoe-giveaways.forum.open_to_everyone",
+      );
+    }
+    if (ids.includes(3)) {
+      // Members granted → all signed-in members.
+      return app.translator.trans(
+        "ernestdefoe-giveaways.forum.open_to_members",
+      );
+    }
+    // Use each group's singular "member name" (e.g. 管理员), as filled in when
+    // the group was created.
+    const sep = app.translator.trans(
+      "ernestdefoe-giveaways.forum.group_separator",
+    ) as string;
+    const names = groups.map((group) => group.name);
+    if (names.length) {
+      return app.translator.trans("ernestdefoe-giveaways.forum.open_to_groups", {
+        groups: names.join(sep),
+      }) as string;
+    }
+    return app.translator.trans("ernestdefoe-giveaways.forum.open_to_admins");
   }
 
   entrantsBlock(g: Giveaway): Mithril.Children {
