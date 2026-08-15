@@ -31,6 +31,9 @@ ernestdefoe-giveaways:
     starts_in: "Starts in {time}"
     entrants: "{count} entrants"
     entrants_label: participants
+    entrants_list_label: Entrants
+    no_entries: "No one has entered yet."
+    tickets: "{count, plural, one {# ticket} other {# tickets}}"
     your_entries: "You have {count} {count, plural, one {entry} other {entries}}"
     winners_count: "{count} {count, plural, one {winner} other {winners}}"
     status_active: Open
@@ -128,6 +131,7 @@ ernestdefoe-giveaways:
     settings_title: Giveaways
     permissions_title: Giveaways
     perm_enter: Enter giveaways
+    perm_view_entries: View entrant lists
     perm_create: Create & manage own giveaways
     perm_manage: Manage all giveaways
     nav_label_setting: Navigation label

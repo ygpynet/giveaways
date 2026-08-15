@@ -14,8 +14,9 @@ import {
   drawGiveaway,
   deleteGiveaway,
   claimGiveaway,
+  listEntries,
 } from "../../common/api";
-import type { Giveaway } from "../../common/api";
+import type { Giveaway, GiveawayEntrant } from "../../common/api";
 import { countdown } from "../../common/format";
 import GiveawayFormModal from "../components/GiveawayFormModal";
 
@@ -25,6 +26,10 @@ export default class GiveawayPage extends Page {
   claiming = false;
   drawing = false;
   giveaway: Giveaway | null = null;
+  entrants: GiveawayEntrant[] = [];
+  entrantTotal: number | null = null;
+  entrantHasMore = false;
+  entrantPage = 1;
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
@@ -44,12 +49,35 @@ export default class GiveawayPage extends Page {
         this.giveaway = res.data;
         app.setTitle(this.giveaway.title);
         this.loading = false;
+        this.entrants = [];
+        this.entrantPage = 1;
+        this.entrantHasMore = false;
+        this.entrantTotal = null;
+        this.loadEntries();
         m.redraw();
       })
       .catch(() => {
         this.loading = false;
         m.redraw();
       });
+  }
+
+  loadEntries() {
+    const g = this.giveaway;
+    if (!g) return;
+    listEntries(g.id, this.entrantPage)
+      .then((res) => {
+        this.entrants = [...this.entrants, ...res.data];
+        this.entrantTotal = res.meta.total;
+        this.entrantHasMore = res.meta.hasMore;
+        m.redraw();
+      })
+      .catch(() => {});
+  }
+
+  loadMoreEntries() {
+    this.entrantPage += 1;
+    this.loadEntries();
   }
 
   enter() {
@@ -215,6 +243,7 @@ export default class GiveawayPage extends Page {
             {this.winnerBanner(g)}
             {this.descriptionBlock(g)}
             {this.requirementsBlock(g)}
+            {this.entrantsBlock(g)}
             {this.winnersBlock(g)}
             {this.fairnessBlock(g)}
           </div>
@@ -333,6 +362,58 @@ export default class GiveawayPage extends Page {
             </li>
           )}
         </ul>
+      </section>
+    );
+  }
+
+  entrantsBlock(g: Giveaway): Mithril.Children {
+    if (!g.canViewEntries) return null;
+    return (
+      <section className="GiveawayPage-section">
+        <h2>
+          {app.translator.trans(
+            "ernestdefoe-giveaways.forum.entrants_list_label",
+          )}{" "}
+          ({this.entrantTotal ?? g.entrantCount})
+        </h2>
+        {this.entrants.length === 0 ? (
+          <p>
+            {app.translator.trans("ernestdefoe-giveaways.forum.no_entries")}
+          </p>
+        ) : (
+          <ul className="GiveawayPage-winners">
+            {this.entrants.map((e) => (
+              <li className="GiveawayPage-winner">
+                {e.user ? (
+                  <Link
+                    href={app.route("user", { username: e.user.username })}
+                    className="GiveawayPage-winner-user"
+                  >
+                    <img className="Avatar" src={e.user.avatarUrl || ""} alt="" />
+                    <span>{e.user.displayName}</span>
+                  </Link>
+                ) : (
+                  <span className="GiveawayPage-winner-user">—</span>
+                )}
+                <span className="GiveawayPage-winner-claim">
+                  <Icon name="fas fa-ticket-alt" />{" "}
+                  {app.translator.trans(
+                    "ernestdefoe-giveaways.forum.tickets",
+                    { count: e.entries },
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {this.entrantHasMore && (
+          <Button
+            className="Button Button--block"
+            onclick={() => this.loadMoreEntries()}
+          >
+            {app.translator.trans("ernestdefoe-giveaways.forum.load_more")}
+          </Button>
+        )}
       </section>
     );
   }

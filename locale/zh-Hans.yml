@@ -26,6 +26,9 @@ ernestdefoe-giveaways:
     starts_in: "{time} 后开始"
     entrants: "{count} 人参与"
     entrants_label: 人参与
+    entrants_list_label: 参与名单
+    no_entries: "还没有人参与。"
+    tickets: "{count} 个名额"
     your_entries: "您拥有 {count} 个抽奖条目"
     winners_count: "{count} 名获奖者"
     status_active: 进行中
@@ -107,6 +110,7 @@ ernestdefoe-giveaways:
     settings_title: 抽奖活动
     permissions_title: 抽奖活动
     perm_enter: "参与抽奖"
+    perm_view_entries: "查看参与名单"
     perm_create: "创建和管理自己的抽奖活动"
     perm_manage: "管理所有抽奖活动"
     nav_label_setting: "导航栏文本"

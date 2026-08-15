@@ -97,6 +97,7 @@ class GiveawayPresenter
             'minPosts'     => (int) ($s['min_posts'] ?? 0),
             'minAgeDays'   => (int) ($s['min_age_days'] ?? 0),
             'canManage'    => $canManage,
+            'canViewEntries' => $canManage || $this->actor->hasPermission('giveaways.viewEntries'),
             'iWon'         => (bool) $myWin,
             'myClaimedAt'  => $myWin ? optional($myWin->claimed_at)->toIso8601String() : null,
             // Instructions are only meaningful to winners and managers.

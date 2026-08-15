@@ -47,6 +47,7 @@ return [
         ->get('/giveaways/health', 'giveaways.health', Controller\HealthController::class)
         ->get('/giveaways', 'giveaways.index', Controller\ListGiveawaysController::class)
         ->get('/giveaways/{id}', 'giveaways.show', Controller\ShowGiveawayController::class)
+        ->get('/giveaways/{id}/entries', 'giveaways.entries.index', Controller\ListEntriesController::class)
         ->post('/giveaways', 'giveaways.create', Controller\SaveGiveawayController::class)
         ->patch('/giveaways/{id}', 'giveaways.update', Controller\SaveGiveawayController::class)
         ->delete('/giveaways/{id}', 'giveaways.delete', Controller\DeleteGiveawayController::class)

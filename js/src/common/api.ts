@@ -13,6 +13,13 @@ export interface GiveawayWinner {
   claimedAt: string | null;
 }
 
+export interface GiveawayEntrant {
+  user: GiveawayUser | null;
+  entries: number;
+  sources: Record<string, number> | null;
+  createdAt: string | null;
+}
+
 export interface GiveawayCategory {
   id: number;
   name: string;
@@ -65,7 +72,8 @@ export interface ListResult {
   data: Giveaway[];
   meta: {
     canCreate: boolean;
-    canManage: boolean;
+  canManage: boolean;
+  canViewEntries: boolean;
     page?: number;
     hasMore?: boolean;
     total?: number;
@@ -94,6 +102,19 @@ export function enterGiveaway(id: number): Promise<{ data: Giveaway }> {
   return app.request<{ data: Giveaway }>({
     method: "POST",
     url: `${base()}/${id}/enter`,
+  });
+}
+
+export interface EntriesResult {
+  data: GiveawayEntrant[];
+  meta: { total: number; page: number; hasMore: boolean };
+}
+
+export function listEntries(id: number, page: number = 1): Promise<EntriesResult> {
+  const q = page > 1 ? `?page=${page}` : "";
+  return app.request<EntriesResult>({
+    method: "GET",
+    url: `${base()}/${id}/entries` + q,
   });
 }
 

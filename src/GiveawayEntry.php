@@ -21,7 +21,10 @@ class GiveawayEntry extends AbstractModel
 {
     protected $table = 'giveaway_entries';
 
-    protected $casts = ['entries' => 'integer'];
+    protected $casts = [
+        'entries'    => 'integer',
+        'created_at' => 'datetime',
+    ];
 
     public function giveaway(): BelongsTo
     {
