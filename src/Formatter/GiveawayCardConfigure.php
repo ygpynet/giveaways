@@ -30,16 +30,20 @@ class GiveawayCardConfigure
       <span class="GiveawayCard-category" style="color: {@categorycolor}">
         <xsl:if test="@categoryicon != ''">
           <i class="icon {@categoryicon}" aria-hidden="true"></i>
-        </xsl:if>
-        {@category}
+        </xsl:if>{@category}
       </span>
     </xsl:if>
-    <h3 class="GiveawayCard-title">{@title}</h3>
+    <h3 class="GiveawayCard-title" style="margin:0 0 6px">{@title}</h3>
     <div class="GiveawayCard-prize"><i class="icon fas fa-trophy" aria-hidden="true"></i> {@prize}</div>
     <div class="GiveawayCard-meta">
       <span><i class="icon fas fa-clock" aria-hidden="true"></i> <time class="GiveawayCard-endsin" datetime="{@endsin_iso}">{@endsin}</time></span>
       <span><i class="icon fas fa-users" aria-hidden="true"></i> {@entrants} {@entrantslabel}</span>
     </div>
+    <xsl:if test="@myentries > 0">
+      <div class="GiveawayCard-entered">
+      <i class="icon fas fa-check-circle" aria-hidden="true"></i> {@myentrieslabel}
+      </div>
+    </xsl:if>
   </div>
 </a>
 XML
