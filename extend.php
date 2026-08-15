@@ -8,6 +8,7 @@
 
 use ErnestDefoe\Giveaways\Api\Controller;
 use ErnestDefoe\Giveaways\Console\DrawDueCommand;
+use ErnestDefoe\Giveaways\Giveaway;
 use ErnestDefoe\Giveaways\Listener\AwardPostBonus;
 use ErnestDefoe\Giveaways\Api\Resource;
 use ErnestDefoe\Giveaways\Notification\GiveawayClaimedBlueprint;
@@ -20,6 +21,8 @@ use Flarum\Api\Endpoint\Endpoint;
 use Flarum\Api\Endpoint\Index;
 use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
+use Flarum\Locale\TranslatorInterface;
+use Tobyz\JsonApiServer\Schema\Field\Field;
 
 return [
     (new Extend\Frontend('forum'))
@@ -85,5 +88,27 @@ return [
                     return (bool) preg_match('/\[giveaway slug=/', (string) ($discussion->firstPost->content ?? ''));
                 }),
         ];
+    })
+    ->field('title', function (Field $field) {
+        return $field->get(function (Discussion $discussion) {
+            $title = (string) $discussion->title;
+            $content = (string) ($discussion->firstPost->content ?? '');
+
+            // Only the first [giveaway slug=...] in the first post counts,
+            // mirroring how the giveaway badge (hasGiveaway) works.
+            if (! preg_match('/\[giveaway slug=([^\s\]]+)/', $content, $matches)) {
+                return $title;
+            }
+
+            $giveaway = Giveaway::query()->where('slug', $matches[1])->first();
+
+            if (! $giveaway || ! $giveaway->hasEnded()) {
+                return $title;
+            }
+
+            $badge = resolve(TranslatorInterface::class)->trans('ernestdefoe-giveaways.forum.ended_title_prefix');
+
+            return $badge . ' ' . $title;
+        });
     }),
 ];

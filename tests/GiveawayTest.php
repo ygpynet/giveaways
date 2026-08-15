@@ -88,4 +88,61 @@ class GiveawayTest extends TestCase
 
         $this->assertFalse($g->isRunning());
     }
+
+    public function testActiveWithinWindowHasNotEnded(): void
+    {
+        $g = new Giveaway();
+        $g->setRawAttributes([
+            'status'    => 'active',
+            'starts_at' => Carbon::parse('-1 hour'),
+            'ends_at'   => Carbon::parse('+1 day'),
+        ]);
+
+        $this->assertFalse($g->hasEnded());
+    }
+
+    public function testNotYetStartedHasNotEnded(): void
+    {
+        $g = new Giveaway();
+        $g->setRawAttributes([
+            'status'    => 'active',
+            'starts_at' => Carbon::parse('+1 hour'),
+            'ends_at'   => Carbon::parse('+2 days'),
+        ]);
+
+        $this->assertFalse($g->hasEnded());
+    }
+
+    public function testExpiredWindowHasEnded(): void
+    {
+        $g = new Giveaway();
+        $g->setRawAttributes([
+            'status'  => 'active',
+            'ends_at' => Carbon::parse('-1 minute'),
+        ]);
+
+        $this->assertTrue($g->hasEnded());
+    }
+
+    public function testDrawnHasEnded(): void
+    {
+        $g = new Giveaway();
+        $g->setRawAttributes([
+            'status'  => 'drawn',
+            'ends_at' => Carbon::parse('+1 day'),
+        ]);
+
+        $this->assertTrue($g->hasEnded());
+    }
+
+    public function testCancelledHasEnded(): void
+    {
+        $g = new Giveaway();
+        $g->setRawAttributes([
+            'status'  => 'cancelled',
+            'ends_at' => Carbon::parse('+1 day'),
+        ]);
+
+        $this->assertTrue($g->hasEnded());
+    }
 }

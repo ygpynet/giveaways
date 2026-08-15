@@ -92,4 +92,15 @@ class Giveaway extends AbstractModel
             && (! $this->starts_at || $this->starts_at->lte($now))
             && $this->ends_at->gt($now);
     }
+
+    /**
+     * Whether this giveaway is over for participants: drawn, cancelled, or its
+     * window has expired (still 'active' but past the end time). Unlike
+     * isRunning(), a not-yet-started giveaway is NOT "ended".
+     */
+    public function hasEnded(): bool
+    {
+        return in_array($this->status, ['drawn', 'cancelled'], true)
+            || ($this->status === 'active' && $this->ends_at->lte(Carbon::now()));
+    }
 }

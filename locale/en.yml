@@ -21,6 +21,7 @@ ernestdefoe-giveaways:
     nav: Giveaways
     page_title: Giveaways
     heading: Giveaways
+    ended_title_prefix: "[Ended]"
     subheading: Enter for a chance to win. Winners are drawn fairly and verifiably.
     giveaway_badge_tooltip: "This topic contains a giveaway"
     empty: No giveaways right now. Check back soon!

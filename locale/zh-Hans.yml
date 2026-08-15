@@ -18,6 +18,7 @@ ernestdefoe-giveaways:
     nav: 抽奖活动
     page_title: 抽奖活动
     heading: 抽奖活动
+    ended_title_prefix: "[已结束]"
     subheading: "参与抽奖，赢取好礼。中奖名单开奖公开透明且可验证。"
     giveaway_badge_tooltip: "抽奖"
     empty: "暂无抽奖活动，过段时间再来看看吧！"
