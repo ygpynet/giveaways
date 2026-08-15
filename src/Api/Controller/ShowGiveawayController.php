@@ -18,7 +18,7 @@ class ShowGiveawayController implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $actor = RequestUtil::getActor($request);
-        $key = (string) Arr::get($request->getAttributes(), 'routeParameters.id');
+        $key = rawurldecode((string) Arr::get($request->getAttributes(), 'routeParameters.id'));
 
         $g = Giveaway::query()->with(['user', 'category'])->where('slug', $key)->first();
 

@@ -4,6 +4,7 @@ namespace ErnestDefoe\Giveaways\Support;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
+use Flarum\Settings\SettingsRepositoryInterface;
 
 /**
  * Shared slug generation + safe-save helpers used by giveaways and categories.
@@ -15,9 +16,30 @@ use Illuminate\Support\Str;
  */
 class SlugHelper
 {
-    public static function base(string $title, string $fallback = 'giveaway'): string
+    public static function base(string $title, string $fallback = 'giveaway', ?string $language = null): string
     {
-        return Str::slug($title) ?: $fallback;
+        $language ??= self::forumLocale();
+
+        $slug = Str::slug($title, '-', $language);
+
+         // default_locale 无法转写中文时（如 en），退回 zh 拼音转写，与 Flarum 帖子一致
+        if ($slug === '' && $language !== 'zh') {
+            $slug = Str::slug($title, '-', 'zh');
+        }
+
+        // 截断，保证 varchar(255) utf8mb4 下加上 "-2" 后缀也不超长
+        $slug = mb_substr($slug, 0, 60);
+
+        return $slug !== '' ? $slug : $fallback;
+    }
+
+    private static function forumLocale(): string
+    {
+        try {
+            return resolve(SettingsRepositoryInterface::class)->get('default_locale', 'en');
+        } catch (\Throwable $e) {
+            return 'en'; // 单测/容器未启动时兜底
+        }
     }
 
     /**
