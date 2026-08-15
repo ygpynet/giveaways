@@ -98,6 +98,7 @@ class GiveawayPresenter
             'totalEntries' => $totalEntries,
             'myEntries'    => $myEntry ? (int) $myEntry->entries : 0,
             'mySources'    => $myEntry ? $myEntry->sourcesArray() : null,
+            'myRank'       => $full && $myEntry ? $this->myRank($g, $myEntry) : null,
             'postBonus'    => (int) ($s['post_bonus'] ?? 0),
             'minPosts'     => (int) ($s['min_posts'] ?? 0),
             'minAgeDays'   => (int) ($s['min_age_days'] ?? 0),
@@ -207,6 +208,25 @@ class GiveawayPresenter
             return $this->myWins->get($g->id);
         }
         return $g->winners()->where('user_id', $this->actor->id)->first();
+    }
+
+    /**
+     * The actor's position in the entrants leaderboard — the same ordering the
+     * participants list uses (most entries first, earlier entry wins ties).
+     * Only meaningful once they've entered, hence the null when they haven't.
+     */
+    protected function myRank(Giveaway $g, GiveawayEntry $myEntry): int
+    {
+        return GiveawayEntry::query()
+            ->where('giveaway_id', $g->id)
+            ->where(function ($q) use ($myEntry) {
+                $q->where('entries', '>', (int) $myEntry->entries)
+                    ->orWhere(function ($q2) use ($myEntry) {
+                        $q2->where('entries', '=', (int) $myEntry->entries)
+                            ->where('created_at', '<', $myEntry->created_at);
+                    });
+            })
+            ->count() + 1;
     }
 
     private static function user(User $u): array

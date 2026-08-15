@@ -55,6 +55,7 @@ export interface Giveaway {
   totalEntries: number;
   myEntries: number;
   mySources: Record<string, number> | null;
+  myRank: number | null;
   postBonus: number;
   minPosts: number;
   minAgeDays: number;

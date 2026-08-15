@@ -29,6 +29,7 @@ ernestdefoe-giveaways:
     starts_in: "{time} 后开始"
     entrants: "{count} 人参与"
     entrants_label: 人参与
+    my_rank: 我的名次
     entrants_list_label: 参与名单
     no_entries: "还没有人参与。"
     tickets: "{count} 个名额"

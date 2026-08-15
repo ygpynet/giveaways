@@ -16,7 +16,7 @@ import {
   listEntries,
 } from "../../common/api";
 import type { Giveaway, GiveawayEntrant, GiveawayGroup } from "../../common/api";
-import { countdown } from "../../common/format";
+import { countdown, isPast } from "../../common/format";
 import GiveawayFormModal from "../components/GiveawayFormModal";
 
 export default class GiveawayPage extends Page {
@@ -29,6 +29,7 @@ export default class GiveawayPage extends Page {
   entrantTotal: number | null = null;
   entrantHasMore = false;
   entrantPage = 1;
+  tick: number | null = null;
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
@@ -38,6 +39,29 @@ export default class GiveawayPage extends Page {
       m.route.get(),
     );
     this.load();
+  }
+
+  oncreate(vnode: Mithril.VnodeDOM) {
+    super.oncreate(vnode);
+    this.tick = setInterval(() => {
+      // Keep the countdown live. Once the end time passes locally the box
+      // flips to "ended" (server status only changes when the giveaway is
+      // drawn), and the timer stops.
+      if (!this.giveaway) return;
+      m.redraw();
+      if (isPast(this.giveaway.endsAt) && this.tick !== null) {
+        clearInterval(this.tick);
+        this.tick = null;
+      }
+    }, 1000);
+  }
+
+  onremove(vnode: Mithril.VnodeDOM) {
+    super.onremove(vnode);
+    if (this.tick !== null) {
+      clearInterval(this.tick);
+      this.tick = null;
+    }
   }
 
   load() {
@@ -519,7 +543,7 @@ export default class GiveawayPage extends Page {
   }
 
   actionBox(g: Giveaway): Mithril.Children {
-    const active = g.status === "active";
+    const active = g.status === "active" && !isPast(g.endsAt);
     const entered = g.myEntries > 0;
 
     return (
@@ -527,11 +551,18 @@ export default class GiveawayPage extends Page {
         <div className="GiveawayPage-stat">
           <strong>{g.entrantCount}</strong>
           <span>
-            {app.translator.trans("ernestdefoe-giveaways.forum.entrants", {
-              count: g.entrantCount,
-            })}
+            {app.translator.trans("ernestdefoe-giveaways.forum.entrants_label")}
           </span>
         </div>
+
+        {g.myRank !== null && (
+          <div className="GiveawayPage-stat">
+            <strong>{g.myRank}</strong>
+            <span>
+              {app.translator.trans("ernestdefoe-giveaways.forum.my_rank")}
+            </span>
+          </div>
+        )}
 
         {active ? (
           <div className="GiveawayPage-countdown">

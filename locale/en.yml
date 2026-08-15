@@ -34,6 +34,7 @@ ernestdefoe-giveaways:
     starts_in: "Starts in {time}"
     entrants: "{count} entrants"
     entrants_label: participants
+    my_rank: My rank
     entrants_list_label: Entrants
     no_entries: "No one has entered yet."
     tickets: "{count, plural, one {# ticket} other {# tickets}}"
