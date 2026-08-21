@@ -106,6 +106,7 @@ ernestdefoe-giveaways:
     # Create / edit
     create: New giveaway
     composer_button: Post a giveaway
+    edit_composer_button: Edit giveaway
     edit: Edit
     delete: Delete
     draw_now: Draw now

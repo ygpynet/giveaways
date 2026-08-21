@@ -87,6 +87,7 @@ ernestdefoe-giveaways:
       confirm_delete: "确定删除此分类？该分类下的抽奖活动将变为未分类状态。"
     create: "发布抽奖"
     composer_button: "发布抽奖"
+    edit_composer_button: "编辑抽奖"
     edit: 编辑
     delete: 删除
     draw_now: "开奖"
