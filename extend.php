@@ -23,6 +23,8 @@ use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
 use Flarum\Locale\TranslatorInterface;
 use Tobyz\JsonApiServer\Schema\Field\Field;
+use ErnestDefoe\Giveaways\Listener\LinkGiveawayToDiscussion;
+use Flarum\Discussion\Event\Created;
 
 return [
     (new Extend\Frontend('forum'))
@@ -63,7 +65,8 @@ return [
         ->delete('/giveaway-categories/{id}', 'giveaways.categories.delete', Controller\DeleteCategoryController::class),
 
     (new Extend\Event())
-        ->listen(Posted::class, AwardPostBonus::class),
+        ->listen(Posted::class, AwardPostBonus::class)
+        ->listen(Posted::class, LinkGiveawayToDiscussion::class),
 
     (new Extend\ApiResource(Resource\GiveawayResource::class)),
 

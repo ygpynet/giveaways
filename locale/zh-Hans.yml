@@ -39,6 +39,7 @@ ernestdefoe-giveaways:
     status_active: 进行中
     status_drawn: 已开奖
     status_cancelled: 已取消
+    status_draft: 草稿
     enter: "参与抽奖"
     entered: "您已参与！"
     enter_again: "您已参与"

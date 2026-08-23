@@ -29,6 +29,10 @@ class ShowGiveawayController implements RequestHandlerInterface
             $g = Giveaway::query()->with(['user', 'category'])->find((int) $key);
         }
 
+        if ($g && $g->status === 'draft' && ! $g->canBeManagedBy($actor)) {
+            $g = null;
+        }
+
         if (! $g) {
             throw new ModelNotFoundException();
         }

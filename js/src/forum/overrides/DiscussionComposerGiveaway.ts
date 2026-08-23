@@ -36,6 +36,7 @@ export default function init() {
 
               app.modal.show(GiveawayFormModal, {
                 slug: slug || undefined,
+                context: "composer",
                 onsave: (saved) => {
                   if (!saved || !saved.slug) return;
 

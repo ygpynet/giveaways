@@ -17,6 +17,7 @@ export interface GiveawayFormAttrs extends IInternalModalAttrs {
   giveaway?: Giveaway;
   slug?: string;
   categories?: GiveawayCategory[];
+  context?: string;
   onsave?: (giveaway?: Giveaway) => void;
 }
 
@@ -307,6 +308,10 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
       categoryId: this.categoryId() || null,
       claimInstructions: this.claimInstructions(),
     };
+
+    if (!this.giveaway && this.attrs.context === "composer") {
+      attrs.status = "draft";
+    }
 
     saveGiveaway(attrs, this.giveaway?.id)
       .then(({ data }) => {

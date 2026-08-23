@@ -3,31 +3,36 @@
 namespace ErnestDefoe\Giveaways\Listener;
 
 use ErnestDefoe\Giveaways\Giveaway;
-use Flarum\Discussion\Event\Created;
+use Flarum\Post\Event\Posted;
 
 /**
- * When a discussion is published, scan its first post for [giveaway slug=...]
- * and link the giveaway to the discussion so it becomes visible on /giveaways.
+ * When a discussion's first post is created, scan it for [giveaway slug=...]
+ * and link the giveaway to the discussion (activating drafts) so it becomes
+ * visible on /giveaways.
  */
 class LinkGiveawayToDiscussion
 {
-    public function handle(Created $event): void
+    public function handle(Posted $event): void
     {
-        $discussion = $event->discussion;
-        $discussion->load('firstPost');
+        $post = $event->post;
 
-        $post = $discussion->firstPost ?? null;
-        if (! $post || empty($post->content)) {
+        // Only the first post of a discussion can bind giveaways.
+        if ((int) $post->number !== 1) {
             return;
         }
 
-        if (preg_match_all('/\[giveaway slug=([^\s\]]+)/', $post->content, $matches)) {
-            foreach ($matches[1] as $slug) {
-                $giveaway = Giveaway::query()->where('slug', $slug)->first();
-                if ($giveaway && ! $giveaway->discussion_id) {
-                    $giveaway->discussion_id = $event->discussion->id;
-                    $giveaway->save();
+        if (! preg_match_all('/\[giveaway slug=([^\s\]]+)/', (string) $post->content, $matches)) {
+            return;
+        }
+
+        foreach ($matches[1] as $slug) {
+            $giveaway = Giveaway::query()->where('slug', $slug)->first();
+            if ($giveaway && ! $giveaway->discussion_id) {
+                $giveaway->discussion_id = $post->discussion_id;
+                if ($giveaway->status === 'draft') {
+                    $giveaway->status = 'active';
                 }
+                $giveaway->save();
             }
         }
     }

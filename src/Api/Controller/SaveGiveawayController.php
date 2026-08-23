@@ -43,7 +43,7 @@ public function __construct(
             $actor->assertCan('giveaways.create');
             $g = new Giveaway();
             $g->user_id = $actor->id;
-            $g->status = 'active';
+            $g->status = (($attrs['status'] ?? null) === 'draft') ? 'draft' : 'active';
         }
 
         $errors = [];

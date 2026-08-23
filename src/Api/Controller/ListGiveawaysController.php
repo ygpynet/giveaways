@@ -23,6 +23,7 @@ class ListGiveawaysController implements RequestHandlerInterface
 
         $query = Giveaway::query()->with(['user', 'category'])
             // Portable ordering — FIELD() is MySQL-only (breaks PG/SQLite).
+            ->where('status', '!=', 'draft')
             ->orderByRaw("CASE status WHEN 'active' THEN 0 WHEN 'drawn' THEN 1 WHEN 'cancelled' THEN 2 ELSE 3 END")
             ->orderBy('ends_at', 'desc');
 

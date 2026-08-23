@@ -44,6 +44,7 @@ ernestdefoe-giveaways:
     status_active: Open
     status_drawn: Drawn
     status_cancelled: Cancelled
+    status_draft: Draft
 
     # Enter
     enter: Enter giveaway
