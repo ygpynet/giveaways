@@ -15,7 +15,11 @@ import {
   claimGiveaway,
   listEntries,
 } from "../../common/api";
-import type { Giveaway, GiveawayEntrant, GiveawayGroup } from "../../common/api";
+import type {
+  Giveaway,
+  GiveawayEntrant,
+  GiveawayGroup,
+} from "../../common/api";
 import { countdown, isPast, formatDateTime } from "../../common/format";
 import GiveawayFormModal from "../components/GiveawayFormModal";
 
@@ -114,7 +118,9 @@ export default class GiveawayPage extends Page {
     if (!app.session.user) {
       // LogInModal 是核心懒加载 chunk，必须点击时才通过 asyncModuleImport 加载，
       // 顶层静态 import 会在 chunk 就绪前解析成 undefined。
-      app.modal.show(() => flarum.reg.asyncModuleImport("flarum/forum/components/LogInModal"));
+      app.modal.show(() =>
+        flarum.reg.asyncModuleImport("flarum/forum/components/LogInModal"),
+      );
       return;
     }
     this.entering = true;
@@ -230,20 +236,7 @@ export default class GiveawayPage extends Page {
             <div className="container">
               <Link
                 className="GiveawayPage-back"
-                href={
-                  app.history?.canGoBack()
-                    ? app.history.backUrl()
-                    : app.route("giveaways.index")
-                }
-                onclick={(e: MouseEvent) => {
-                  if (e.shiftKey || e.ctrlKey || e.metaKey || e.which === 2)
-                    return;
-                  // 浏览器式返回：有来路就回退到上一页，否则落到抽奖列表
-                  if (app.history?.canGoBack()) {
-                    e.preventDefault();
-                    app.history.back();
-                  }
-                }}
+                href={app.route("giveaways.index")}
               >
                 <Icon name="fas fa-chevron-left" />{" "}
                 {app.translator.trans("ernestdefoe-giveaways.forum.nav")}
@@ -415,9 +408,12 @@ export default class GiveawayPage extends Page {
     ) as string;
     const names = groups.map((group) => group.name);
     if (names.length) {
-      return app.translator.trans("ernestdefoe-giveaways.forum.open_to_groups", {
-        groups: names.join(sep),
-      }) as string;
+      return app.translator.trans(
+        "ernestdefoe-giveaways.forum.open_to_groups",
+        {
+          groups: names.join(sep),
+        },
+      ) as string;
     }
     return app.translator.trans("ernestdefoe-giveaways.forum.open_to_admins");
   }
@@ -445,7 +441,11 @@ export default class GiveawayPage extends Page {
                     href={app.route("user", { username: e.user.username })}
                     className="GiveawayPage-winner-user"
                   >
-                    <img className="Avatar" src={e.user.avatarUrl || ""} alt="" />
+                    <img
+                      className="Avatar"
+                      src={e.user.avatarUrl || ""}
+                      alt=""
+                    />
                     <span>{e.user.displayName}</span>
                   </Link>
                 ) : (
@@ -453,10 +453,9 @@ export default class GiveawayPage extends Page {
                 )}
                 <span className="GiveawayPage-winner-claim">
                   <Icon name="fas fa-ticket-alt" />{" "}
-                  {app.translator.trans(
-                    "ernestdefoe-giveaways.forum.tickets",
-                    { count: e.entries },
-                  )}
+                  {app.translator.trans("ernestdefoe-giveaways.forum.tickets", {
+                    count: e.entries,
+                  })}
                 </span>
                 <time
                   className="GiveawayPage-winner-time"
