@@ -87,12 +87,16 @@ export default class GiveawayPage extends Page {
       });
   }
 
-  loadEntries() {
+  loadEntries(reset = false) {
     const g = this.giveaway;
     if (!g) return;
+    if (reset) {
+      this.entrantPage = 1;
+      this.entrants = [];
+    }
     listEntries(g.id, this.entrantPage)
       .then((res) => {
-        this.entrants = [...this.entrants, ...res.data];
+        this.entrants = reset ? res.data : [...this.entrants, ...res.data];
         this.entrantTotal = res.meta.total;
         this.entrantHasMore = res.meta.hasMore;
         m.redraw();
@@ -122,6 +126,8 @@ export default class GiveawayPage extends Page {
           { type: "success" },
           app.translator.trans("ernestdefoe-giveaways.forum.enter_success"),
         );
+        // 立即刷新参与名单（服务端按时间倒序，自己会出现在最前面）
+        this.loadEntries(true);
         m.redraw();
       })
       .catch(() => {
