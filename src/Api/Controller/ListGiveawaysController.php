@@ -23,9 +23,26 @@ class ListGiveawaysController implements RequestHandlerInterface
 
         $query = Giveaway::query()->with(['user', 'category'])
             // Portable ordering — FIELD() is MySQL-only (breaks PG/SQLite).
-            ->where('status', '!=', 'draft')
-            ->orderByRaw("CASE status WHEN 'active' THEN 0 WHEN 'drawn' THEN 1 WHEN 'cancelled' THEN 2 ELSE 3 END")
+            // Drafts sort first so their author sees them at the top of the
+            // list; other actors never receive drafts (filter below), so the
+            // rank is invisible to them.
+            ->orderByRaw("CASE status WHEN 'draft' THEN 0 WHEN 'active' THEN 1 WHEN 'drawn' THEN 2 WHEN 'cancelled' THEN 3 ELSE 4 END")
             ->orderBy('ends_at', 'desc');
+
+        // Drafts are private: visible only to their author and global managers.
+        // Everyone else gets non-draft giveaways only.
+        if (! $actor->hasPermission('giveaways.manage')) {
+            if ($actor->isGuest()) {
+                $query->where('status', '!=', Giveaway::STATUS_DRAFT);
+            } else {
+                $query->where(function ($q) use ($actor) {
+                    $q->where('status', '!=', Giveaway::STATUS_DRAFT)
+                        ->orWhere(fn ($q2) => $q2
+                            ->where('status', Giveaway::STATUS_DRAFT)
+                            ->where('user_id', $actor->id));
+                });
+            }
+        }
 
         $total = (clone $query)->count();
 

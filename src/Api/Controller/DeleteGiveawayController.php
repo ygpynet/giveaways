@@ -5,6 +5,7 @@ namespace ErnestDefoe\Giveaways\Api\Controller;
 use ErnestDefoe\Giveaways\Giveaway;
 use ErnestDefoe\Giveaways\GiveawayEntry;
 use ErnestDefoe\Giveaways\GiveawayWinner;
+use ErnestDefoe\Giveaways\Support\GiveawaySlugLookup;
 use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Database\ConnectionInterface;
@@ -42,6 +43,8 @@ class DeleteGiveawayController implements RequestHandlerInterface
             GiveawayWinner::where('giveaway_id', $g->id)->delete();
             $g->delete();
         });
+
+        GiveawaySlugLookup::flush();
 
         return new EmptyResponse(204);
     }

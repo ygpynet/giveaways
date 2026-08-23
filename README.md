@@ -17,6 +17,8 @@ Run **provably-fair giveaways** on your [Flarum](https://flarum.org) community. 
 - 🗂️ **Categories** — organise giveaways into colour-coded categories with filter pills, badges and an inline manager.
 - 🎯 **Eligibility rules** — optionally require a minimum post count or account age to enter.
 - ⏱️ **Scheduled auto-draw** — set an end time and the winners are drawn automatically by the scheduler. Hosts can also **draw now** at any time.
+- 🚫 **Cancel with refunds** — hosts can cancel a running giveaway; everyone who paid a points fee is refunded automatically.
+- 📝 **Drafts** — save a giveaway as a draft; only you (and global managers) can see it until you publish.
 - 🔔 **Winner notifications** — every winner gets an in-app alert linking straight to the giveaway.
 - 📦 **Prize claiming** — winners get a "You won!" banner with a one-click **Claim** button; the host is notified and can see per-winner claim status, plus optional claim instructions (e.g. "DM me your address").
 - 🛡️ **Provably fair** — every draw publishes a random **seed** and a **SHA-256 hash** of the full entrant list, so the result is independently reproducible and tamper-evident.

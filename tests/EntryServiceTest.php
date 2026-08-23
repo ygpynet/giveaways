@@ -3,10 +3,13 @@
 namespace ErnestDefoe\Giveaways\Tests;
 
 use Carbon\Carbon;
+use ErnestDefoe\Giveaways\Contract\PointsGateway;
 use ErnestDefoe\Giveaways\EntryService;
 use ErnestDefoe\Giveaways\Giveaway;
 use Flarum\Locale\TranslatorInterface;
 use Flarum\User\User;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\ConnectionInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,7 +23,12 @@ class EntryServiceTest extends TestCase
     {
         $translator = $this->createMock(TranslatorInterface::class);
         $translator->method('trans')->willReturnCallback(fn (string $key, array $params = []) => $key);
-        return new EntryService($translator);
+        return new EntryService(
+            $translator,
+            $this->createMock(ConnectionInterface::class),
+            $this->createMock(PointsGateway::class),
+            $this->createMock(Dispatcher::class)
+        );
     }
 
     private function user(): User
@@ -127,15 +135,11 @@ class EntryServiceTest extends TestCase
     }
 
     /**
-     * With no point system installed, a paid giveaway must refuse entry with
-     * an explicit reason rather than silently entering for free.
+     * With an unavailable points gateway, a paid giveaway must refuse entry
+     * with an explicit reason rather than silently entering for free.
      */
     public function testPaidGiveawayWithoutPointSystemIsIneligible(): void
     {
-        if (\ErnestDefoe\Giveaways\Support\PointSystem::available()) {
-            $this->markTestSkipped('ramon/point-system is installed');
-        }
-
         $g = $this->giveaway([
             'status'    => 'active',
             'starts_at' => Carbon::parse('-1 hour'),

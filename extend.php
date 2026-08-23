@@ -23,6 +23,7 @@ use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
 use Flarum\Locale\TranslatorInterface;
 use Tobyz\JsonApiServer\Schema\Field\Field;
+use ErnestDefoe\Giveaways\Support\GiveawaySlugLookup;
 use ErnestDefoe\Giveaways\Listener\LinkGiveawayToDiscussion;
 use Flarum\Discussion\Event\Created;
 
@@ -38,6 +39,9 @@ return [
         ->css(__DIR__ . '/less/admin.less'),
 
     new Extend\Locales(__DIR__ . '/locale'),
+
+    (new Extend\ServiceProvider())
+        ->register(\ErnestDefoe\Giveaways\Providers\GiveawaysServiceProvider::class),
 
      (new Extend\Formatter())
         ->configure(\ErnestDefoe\Giveaways\Formatter\GiveawayCardConfigure::class)
@@ -59,6 +63,7 @@ return [
         ->post('/giveaways/{id}/enter', 'giveaways.enter', Controller\EnterGiveawayController::class)
         ->post('/giveaways/{id}/draw', 'giveaways.draw', Controller\DrawGiveawayController::class)
         ->post('/giveaways/{id}/claim', 'giveaways.claim', Controller\ClaimGiveawayController::class)
+        ->post('/giveaways/{id}/cancel', 'giveaways.cancel', Controller\CancelGiveawayController::class)
         ->get('/giveaway-categories', 'giveaways.categories.index', Controller\ListCategoriesController::class)
         ->post('/giveaway-categories', 'giveaways.categories.create', Controller\SaveCategoryController::class)
         ->patch('/giveaway-categories/{id}', 'giveaways.categories.update', Controller\SaveCategoryController::class)
@@ -103,7 +108,9 @@ return [
                 return $title;
             }
 
-            $giveaway = Giveaway::query()->where('slug', $matches[1])->first();
+            // Memoized per request — one query per distinct slug per page, not
+            // one per discussion row (see GiveawaySlugLookup).
+            $giveaway = GiveawaySlugLookup::find($matches[1]);
 
             if (! $giveaway || ! $giveaway->hasEnded()) {
                 return $title;

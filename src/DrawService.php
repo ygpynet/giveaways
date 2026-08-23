@@ -3,23 +3,28 @@
 namespace ErnestDefoe\Giveaways;
 
 use Carbon\Carbon;
+use ErnestDefoe\Giveaways\Contract\WinnerPicker;
+use ErnestDefoe\Giveaways\Event\GiveawayWasDrawn;
 use ErnestDefoe\Giveaways\Notification\GiveawayWonBlueprint;
 use Flarum\Notification\NotificationSyncer;
 use Flarum\User\User;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\ConnectionInterface;
 
 /**
  * Provably-fair winner selection. At draw time we publish:
  *   - draw_seed     (random, generated now)
  *   - entrant_hash  (sha256 of the canonical "user_id:entries" list, sorted)
- * Anyone holding the entrant list can re-run pick() with the seed and verify
- * the winners — the draw can't be rigged after the fact.
+ * Anyone holding the entrant list can re-run the WinnerPicker with the seed
+ * and verify the winners — the draw can't be rigged after the fact.
  */
 class DrawService
 {
     public function __construct(
         protected NotificationSyncer $notifications,
-        protected ConnectionInterface $db
+        protected ConnectionInterface $db,
+        protected WinnerPicker $picker,
+        protected Dispatcher $events
     ) {
     }
 
@@ -53,7 +58,7 @@ class DrawService
             $seed = bin2hex(random_bytes(16));
 
             $pool = $entries->map(fn ($e) => ['user_id' => (int) $e->user_id, 'entries' => max(1, (int) $e->entries)])->values()->all();
-            $winnerIds = $this->pick($pool, $seed, (int) $giveaway->winner_count);
+            $winnerIds = $this->picker->pick($pool, $seed, (int) $giveaway->winner_count);
 
             foreach ($winnerIds as $pos => $uid) {
                 $w = new GiveawayWinner();
@@ -72,6 +77,7 @@ class DrawService
 
         // Notifications run after the transaction commits, so a failed alert
         // can never roll a completed draw back.
+        $this->events->dispatch(new GiveawayWasDrawn($giveaway, $winnerIds));
         $this->notifyWinners($giveaway, $winnerIds);
     }
 
@@ -97,42 +103,14 @@ class DrawService
      * Deterministic weighted pick of N distinct winners from a [user_id,entries]
      * pool, seeded by $seed. Pure function of (pool, seed) → verifiable.
      *
+     * The algorithm lives in the injected {@see WinnerPicker} (default:
+     * Support\HashWeightedPicker); this method remains as a thin BC delegate.
+     *
      * @param array<int, array{user_id:int, entries:int}> $pool
      * @return int[] winner user ids in draw order
      */
     public function pick(array $pool, string $seed, int $count): array
     {
-        // Defensive normalization: a non-positive entry count must never produce
-        // a degenerate pool, and this keeps pick() well-defined on any input.
-        $pool = array_map(
-            fn ($row) => ['user_id' => (int) $row['user_id'], 'entries' => max(1, (int) $row['entries'])],
-            $pool
-        );
-
-        $winners = [];
-        $slots = min($count, count($pool));
-
-        for ($i = 0; $i < $slots; $i++) {
-            $total = array_sum(array_column($pool, 'entries'));
-            if ($total <= 0) {
-                break;
-            }
-            // 60 bits of the per-slot hash → fits a 64-bit int → uniform-ish mod total.
-            $r = hexdec(substr(hash('sha256', $seed . ':' . $i), 0, 15)) % $total;
-
-            $acc = 0;
-            $pickIdx = count($pool) - 1;
-            foreach ($pool as $idx => $row) {
-                $acc += $row['entries'];
-                if ($r < $acc) {
-                    $pickIdx = $idx;
-                    break;
-                }
-            }
-            $winners[] = $pool[$pickIdx]['user_id'];
-            array_splice($pool, $pickIdx, 1);
-        }
-
-        return $winners;
+        return $this->picker->pick($pool, $seed, $count);
     }
 }

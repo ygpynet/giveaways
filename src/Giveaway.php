@@ -33,7 +33,45 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Giveaway extends AbstractModel
 {
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_DRAWN = 'drawn';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $table = 'giveaways';
+
+    /**
+     * Allowed status transitions. drawn/cancelled are terminal; the
+     * active → drawn move belongs to DrawService alone (it carries the
+     * provably-fair bookkeeping), everything else goes through explicit
+     * endpoints that validate with canTransitionTo().
+     */
+    protected const TRANSITIONS = [
+        self::STATUS_DRAFT     => [self::STATUS_DRAFT, self::STATUS_ACTIVE, self::STATUS_CANCELLED],
+        self::STATUS_ACTIVE    => [self::STATUS_DRAWN, self::STATUS_CANCELLED],
+        self::STATUS_DRAWN     => [],
+        self::STATUS_CANCELLED => [],
+    ];
+
+    /** Atomically claim a status change (WHERE status IN $from), like draw() does. */
+    public function claimStatus(array $from, string $to): bool
+    {
+        $claimed = static::query()
+            ->whereKey($this->id)
+            ->whereIn('status', $from)
+            ->update(['status' => $to]);
+
+        if ($claimed) {
+            $this->status = $to;
+        }
+
+        return (bool) $claimed;
+    }
+
+    public function canTransitionTo(string $status): bool
+    {
+        return in_array($status, self::TRANSITIONS[$this->status] ?? [], true);
+    }
 
     protected $casts = [
         'starts_at'    => 'datetime',

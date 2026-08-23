@@ -3,6 +3,8 @@
 namespace ErnestDefoe\Giveaways\Api\Controller;
 
 use ErnestDefoe\Giveaways\Api\GiveawayPresenter;
+use ErnestDefoe\Giveaways\Contract\PointsGateway;
+use ErnestDefoe\Giveaways\Exception\GiveawayClosedException;
 use ErnestDefoe\Giveaways\EntryService;
 use ErnestDefoe\Giveaways\Giveaway;
 use Flarum\Foundation\ValidationException;
@@ -20,6 +22,7 @@ class EnterGiveawayController implements RequestHandlerInterface
     public function __construct(
         protected EntryService $entries,
         protected TranslatorInterface $translator,
+        protected PointsGateway $points,
     ) {
     }
 
@@ -39,12 +42,16 @@ class EnterGiveawayController implements RequestHandlerInterface
 
         try {
             $this->entries->enter($g, $actor);
+        } catch (GiveawayClosedException $e) {
+            // The locked re-check inside enter() found the giveaway closed
+            // (draw raced us, or the window ended between check and write).
+            throw new ValidationException(['enter' => $this->translator->trans($e->reasonKey)]);
         } catch (\DomainException $e) {
             // Race fallback: the balance dropped between the eligibility check
             // and the atomic charge (e.g. a concurrent spend on another tab).
             throw new ValidationException(['enter' => $this->translator->trans(
                 'ernestdefoe-giveaways.api.enter_insufficient_points',
-                ['cost' => $this->entries->entryCost($g), 'balance' => \ErnestDefoe\Giveaways\Support\PointSystem::balanceOf($actor)]
+                ['cost' => $this->entries->entryCost($g), 'balance' => $this->points->balanceOf($actor)]
             )]);
         }
 

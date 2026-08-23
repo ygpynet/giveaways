@@ -16,6 +16,7 @@ ernestdefoe-giveaways:
     enter_points_unavailable: "此抽奖需消耗积分，但积分系统当前不可用。"
     claim_not_winner: "您不是此抽奖活动的获奖者。"
     action_failed: "操作失败，请稍后再试。"
+    cancel_not_allowed: "该抽奖活动已无法取消。"
   forum:
     nav: 抽奖活动
     page_title: 抽奖活动
@@ -102,6 +103,8 @@ ernestdefoe-giveaways:
     draw_now: "开奖"
     confirm_delete: "确定要删除此抽奖活动及其所有参与记录吗？"
     confirm_draw: "确定要立即开奖吗？这将立即结束该抽奖活动。"
+    cancel_giveaway: "取消抽奖"
+    confirm_cancel: "确定要取消该抽奖活动吗？所有已支付积分的参与者将获得退款，且此操作无法撤销。"
     saved: "抽奖活动已保存。"
     form:
       title_label: 标题

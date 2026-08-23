@@ -5,6 +5,7 @@ namespace ErnestDefoe\Giveaways\Api\Controller;
 use Carbon\Carbon;
 use ErnestDefoe\Giveaways\Api\GiveawayPresenter;
 use ErnestDefoe\Giveaways\Giveaway;
+use ErnestDefoe\Giveaways\Support\GiveawaySlugLookup;
 use ErnestDefoe\Giveaways\Support\SlugHelper;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
@@ -111,6 +112,7 @@ public function __construct(
             fn () => $g->save(),
             fn () => $g->slug = SlugHelper::unique($g->title, fn ($s) => $this->slugExists($s, $g->id))
         );
+        GiveawaySlugLookup::flush();
         $g->load(['user', 'category']);
 
         return new JsonResponse(['data' => GiveawayPresenter::forActor($actor)->present($g, true)], $id ? 200 : 201);

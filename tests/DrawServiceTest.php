@@ -2,20 +2,20 @@
 
 namespace ErnestDefoe\Giveaways\Tests;
 
-use ErnestDefoe\Giveaways\DrawService;
+use ErnestDefoe\Giveaways\Support\HashWeightedPicker;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The draw algorithm is the product's fairness core: `pick()` must be
+ * The draw algorithm is the product's fairness core: pick() must be
  * deterministic in (pool, seed) so anyone can re-run it and verify winners.
  */
 class DrawServiceTest extends TestCase
 {
-    private function service(): DrawService
+    private function service(): HashWeightedPicker
     {
-        // pick() is a pure function and never touches the injected collaborators;
-        // instantiate without the constructor so the test needs no Flarum container.
-        return (new \ReflectionClass(DrawService::class))->newInstanceWithoutConstructor();
+        // The algorithm lives in HashWeightedPicker (the default WinnerPicker
+        // binding); DrawService::pick() is a thin delegate to it.
+        return new HashWeightedPicker();
     }
 
     public function testEmptyPoolYieldsNoWinners(): void

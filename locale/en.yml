@@ -17,6 +17,7 @@ ernestdefoe-giveaways:
     enter_points_unavailable: "This giveaway costs points, but the point system is currently unavailable."
     claim_not_winner: You're not a winner of this giveaway.
     action_failed: Something went wrong. Please try again later.
+    cancel_not_allowed: This giveaway can no longer be cancelled.
 
   forum:
     # Navigation & page titles
@@ -119,6 +120,8 @@ ernestdefoe-giveaways:
     edit: Edit
     delete: Delete
     draw_now: Draw now
+    cancel_giveaway: Cancel giveaway
+    confirm_cancel: Cancel this giveaway? Every entrant who paid a points fee will be refunded, and this cannot be undone.
     confirm_delete: Delete this giveaway and all its entries?
     confirm_draw: Draw the winners now? This ends the giveaway immediately.
     saved: Giveaway saved.

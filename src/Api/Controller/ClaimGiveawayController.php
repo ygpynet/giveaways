@@ -4,6 +4,7 @@ namespace ErnestDefoe\Giveaways\Api\Controller;
 
 use Carbon\Carbon;
 use ErnestDefoe\Giveaways\Api\GiveawayPresenter;
+use ErnestDefoe\Giveaways\Event\GiveawayWasClaimed;
 use ErnestDefoe\Giveaways\Giveaway;
 use ErnestDefoe\Giveaways\Notification\GiveawayClaimedBlueprint;
 use Flarum\Foundation\ValidationException;
@@ -11,6 +12,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\Locale\TranslatorInterface;
 use Flarum\Notification\NotificationSyncer;
 use Flarum\User\User;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -22,7 +24,8 @@ class ClaimGiveawayController implements RequestHandlerInterface
 {
     public function __construct(
         protected NotificationSyncer $notifications,
-        protected TranslatorInterface $translator
+        protected TranslatorInterface $translator,
+        protected Dispatcher $events
     ) {
     }
 
@@ -42,6 +45,8 @@ class ClaimGiveawayController implements RequestHandlerInterface
         if (! $win->claimed_at) {
             $win->claimed_at = Carbon::now();
             $win->save();
+
+            $this->events->dispatch(new GiveawayWasClaimed($g, $actor));
 
             // Let the host know there's a prize to fulfill (best-effort).
             if ($g->user_id && (int) $g->user_id !== (int) $actor->id) {
