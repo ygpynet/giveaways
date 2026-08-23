@@ -4,8 +4,12 @@ import type { IInternalModalAttrs } from "flarum/common/components/Modal";
 import type Mithril from "mithril";
 import Button from "flarum/common/components/Button";
 import Stream from "flarum/common/utils/Stream";
-
-import { saveGiveaway, showGiveaway, listCategories } from "../../common/api";
+import {
+  saveGiveaway,
+  showGiveaway,
+  listCategories,
+  getCachedCategories,
+} from "../../common/api";
 import type { Giveaway, GiveawayCategory } from "../../common/api";
 import LoadingIndicator from "flarum/common/components/LoadingIndicator";
 
@@ -48,7 +52,7 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
 
   oninit(vnode: Mithril.Vnode<GiveawayFormAttrs>) {
     super.oninit(vnode);
-    this.categories = this.attrs.categories || [];
+    this.categories = this.attrs.categories || getCachedCategories() || [];
     if (!this.categories.length) {
       listCategories().then((res) => {
         this.categories = res.data || [];

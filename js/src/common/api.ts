@@ -82,8 +82,8 @@ export interface ListResult {
   data: Giveaway[];
   meta: {
     canCreate: boolean;
-  canManage: boolean;
-  canViewEntries: boolean;
+    canManage: boolean;
+    canViewEntries: boolean;
     page?: number;
     hasMore?: boolean;
     total?: number;
@@ -120,7 +120,10 @@ export interface EntriesResult {
   meta: { total: number; page: number; hasMore: boolean };
 }
 
-export function listEntries(id: number, page: number = 1): Promise<EntriesResult> {
+export function listEntries(
+  id: number,
+  page: number = 1,
+): Promise<EntriesResult> {
   const q = page > 1 ? `?page=${page}` : "";
   return app.request<EntriesResult>({
     method: "GET",
@@ -162,17 +165,42 @@ function catBase(): string {
   return app.forum.attribute("apiUrl") + "/giveaway-categories";
 }
 
+let categoriesCache: GiveawayCategory[] | null = null;
+let categoriesPromise: Promise<{ data: GiveawayCategory[] }> | null = null;
+
+export function getCachedCategories(): GiveawayCategory[] | null {
+  return categoriesCache;
+}
+
+export function invalidateCategoriesCache(): void {
+  categoriesCache = null;
+  categoriesPromise = null;
+}
+
 export function listCategories(): Promise<{ data: GiveawayCategory[] }> {
-  return app.request<{ data: GiveawayCategory[] }>({
-    method: "GET",
-    url: catBase(),
-  });
+  if (categoriesCache) {
+    return Promise.resolve({ data: categoriesCache });
+  }
+  if (!categoriesPromise) {
+    // 同一时刻多个组件同时请求时只发一次
+    categoriesPromise = app
+      .request<{ data: GiveawayCategory[] }>({
+        method: "GET",
+        url: catBase(),
+      })
+      .then((res) => {
+        categoriesCache = res.data || [];
+        return res;
+      });
+  }
+  return categoriesPromise;
 }
 
 export function saveCategory(
   attributes: Record<string, unknown>,
   id?: number,
 ): Promise<{ data: GiveawayCategory }> {
+  invalidateCategoriesCache();
   return app.request<{ data: GiveawayCategory }>({
     method: id ? "PATCH" : "POST",
     url: id ? `${catBase()}/${id}` : catBase(),
@@ -181,5 +209,6 @@ export function saveCategory(
 }
 
 export function deleteCategory(id: number): Promise<unknown> {
+  invalidateCategoriesCache();
   return app.request({ method: "DELETE", url: `${catBase()}/${id}` });
 }
