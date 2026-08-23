@@ -4,14 +4,15 @@ import { extend } from "flarum/common/extend";
 import Button from "flarum/common/components/Button";
 
 import GiveawayFormModal from "../components/GiveawayFormModal";
-import { listGiveaways, showGiveaway } from "../../common/api";
 
 let cachedSlug: string | null = null;
 
 function detectGiveawaySlug(dc): string | null {
   try {
     const content = dc.composer?.fields?.content?.() || "";
-    const match = (typeof content === "string" ? content : "").match(/\[giveaway slug=([^\s\]]+)/);
+    const match = (typeof content === "string" ? content : "").match(
+      /\[giveaway slug=([^\s\]]+)/,
+    );
     if (match) {
       cachedSlug = match[1];
       return match[1];
@@ -36,56 +37,40 @@ export default function init() {
           {
             className: "DiscussionComposer-changeTags Button Button--ua-reset",
             onclick: () => {
-              if (slug) {
-                showGiveaway(slug).then(({ data: giveaway }) => {
-                  app.modal.show(GiveawayFormModal, {
-                    giveaway,
-                    onsave: () => {},
-                  });
-                });
-              } else {
-                listGiveaways().then(({ data: before }) => {
-                  const slugs = before.map((g) => g.slug);
+              // 立即弹窗，与官方“选择标签”一致，点击时不再发任何请求
+              app.modal.show(GiveawayFormModal, {
+                slug: slug || undefined,
+                onsave: (saved) => {
+                  if (!saved || !saved.slug) return;
 
-                  app.modal.show(GiveawayFormModal, {
-                    onsave: () => {
-                      listGiveaways().then(({ data: after }) => {
-                        const g =
-                          after.find((x) => !slugs.includes(x.slug)) ||
-                          after.find((x) => x.status === "active") ||
-                          after[0];
-                        if (!g) return;
+                  cachedSlug = saved.slug;
+                  const link = `[giveaway slug=${saved.slug}]`;
+                  const editor = dc.composer?.editor;
 
-                        cachedSlug = g.slug;
-                        const link = `[giveaway slug=${g.slug}]`;
-                        const editor = dc.composer?.editor;
-
-                        if (
-                          editor &&
-                          typeof editor.insertAtCursor === "function"
-                        ) {
-                          editor.insertAtCursor(link);
-                        } else {
-                          const cur = dc.composer.fields.content();
-                          dc.composer.fields.content(
-                            cur
-                              ? cur.replace(/\s+$/, "") + "\n\n" + link.trim()
-                              : link.trim(),
-                          );
-                        }
-                        m.redraw();
-                      });
-                    },
-                  });
-                });
-              }
+                  if (editor && typeof editor.insertAtCursor === "function") {
+                    editor.insertAtCursor(link);
+                  } else {
+                    const cur = dc.composer.fields.content();
+                    dc.composer.fields.content(
+                      cur
+                        ? cur.replace(/\s+$/, "") + "\n\n" + link.trim()
+                        : link.trim(),
+                    );
+                  }
+                  m.redraw();
+                },
+              });
             },
           },
           m(
             "span.TagLabel.untagged",
             slug
-              ? (app.translator.trans("ernestdefoe-giveaways.forum.edit_composer_button") as string)
-              : (app.translator.trans("ernestdefoe-giveaways.forum.composer_button") as string),
+              ? (app.translator.trans(
+                  "ernestdefoe-giveaways.forum.edit_composer_button",
+                ) as string)
+              : (app.translator.trans(
+                  "ernestdefoe-giveaways.forum.composer_button",
+                ) as string),
           ),
         ),
         5,
