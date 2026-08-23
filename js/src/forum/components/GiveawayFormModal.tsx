@@ -319,4 +319,20 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
         this.onerror(err);
       });
   }
+
+  onremove(vnode: Mithril.VnodeDOM<GiveawayFormAttrs, this>) {
+    super.onremove(vnode);
+
+    // 弹窗关闭、焦点陷阱释放后，若焦点回到 composer 内的按钮上，
+    // 则把焦点转移到正文编辑器，避免 Composer 残留 active 状态
+    setTimeout(() => {
+      const active = document.activeElement as HTMLElement | null;
+      const editor = document.querySelector<HTMLElement>(
+        ".Composer .TextEditor-editor, .Composer textarea",
+      );
+      if (editor && active && active.closest(".Composer")) {
+        editor.focus();
+      }
+    }, 60);
+  }
 }

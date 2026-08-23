@@ -37,27 +37,30 @@ export default function init() {
           {
             className: "DiscussionComposer-changeTags Button Button--ua-reset",
             onclick: () => {
-              // 立即弹窗，与官方“选择标签”一致，点击时不再发任何请求
+              const isEdit = !!slug;
+
               app.modal.show(GiveawayFormModal, {
                 slug: slug || undefined,
                 onsave: (saved) => {
                   if (!saved || !saved.slug) return;
 
-                  cachedSlug = saved.slug;
-                  const link = `[giveaway slug=${saved.slug}]`;
-                  const editor = dc.composer?.editor;
+                  if (!isEdit) {
+                    cachedSlug = saved.slug;
+                    const link = `[giveaway slug=${saved.slug}]`;
+                    const editor = dc.composer?.editor;
 
-                  if (editor && typeof editor.insertAtCursor === "function") {
-                    editor.insertAtCursor(link);
-                  } else {
-                    const cur = dc.composer.fields.content();
-                    dc.composer.fields.content(
-                      cur
-                        ? cur.replace(/\s+$/, "") + "\n\n" + link.trim()
-                        : link.trim(),
-                    );
+                    if (editor && typeof editor.insertAtCursor === "function") {
+                      editor.insertAtCursor(link);
+                    } else {
+                      const cur = dc.composer.fields.content();
+                      dc.composer.fields.content(
+                        cur
+                          ? cur.replace(/\s+$/, "") + "\n\n" + link.trim()
+                          : link.trim(),
+                      );
+                    }
+                    m.redraw();
                   }
-                  m.redraw();
                 },
               });
             },
