@@ -608,6 +608,15 @@
   margin: 1em 0;
   border-bottom: 0;
 }
+
+// In posts the card spans the full body width; give the cover the same
+// visual proportion as list cards (280x140 => 5:2) instead of the fixed
+// 140px height, so wide containers stop over-cropping the image.
+.Post-body .GiveawayCard-cover {
+  height: auto;
+  aspect-ratio: 5 / 2;
+  max-height: 320px;
+}
 .Badge--giveaway {
   background: @gv-golden;
 }
