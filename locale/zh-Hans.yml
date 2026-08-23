@@ -32,6 +32,8 @@ ernestdefoe-giveaways:
     entrants: "{count} 人参与"
     entrants_label: 人参与
     my_rank: 我的名次
+    win_chance: 中奖概率
+    win_chance_if_join: 加入后中奖概率
     entrants_list_label: 参与名单
     no_entries: "还没有人参与。"
     tickets: "{count} 个名额"

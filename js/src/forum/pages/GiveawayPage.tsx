@@ -418,6 +418,36 @@ export default class GiveawayPage extends Page {
     return app.translator.trans("ernestdefoe-giveaways.forum.open_to_admins");
   }
 
+  /**
+   * 真实来路 URL；核心启动时会把首页压栈作为兜底，那不算真实来路。
+   */
+  realBackUrl(): string | null {
+    const prev = app.history?.getPrevious?.();
+    if (!prev) return null;
+    if (prev.name === "index" && prev.url === "/") return null;
+    return prev.url || null;
+  }
+
+  /**
+   * 中奖概率（%）：
+   * - 进行中：已参与 = 我的票数/总票数；未参与按“加入获得基础 1 张票”估算；
+   * - 已结束：仍显示实际概率（未参与者不显示，因其概率为 0 无意义）。
+   */
+  winChance(g: Giveaway): number | null {
+    const entered = g.myEntries > 0;
+    const over = g.status !== "active" || isPast(g.endsAt);
+
+    if (over) {
+      if (!entered || g.totalEntries <= 0) return null;
+      return Math.min(100, (g.myEntries / g.totalEntries) * 100);
+    }
+
+    const mine = entered ? g.myEntries : 1;
+    const total = g.totalEntries + (entered ? 0 : 1);
+    if (total <= 0) return null;
+    return Math.min(100, (mine / total) * 100);
+  }
+
   entrantsBlock(g: Giveaway): Mithril.Children {
     if (!g.canViewEntries) return null;
     return (
@@ -585,6 +615,22 @@ export default class GiveawayPage extends Page {
             <strong>{g.myRank}</strong>
             <span>
               {app.translator.trans("ernestdefoe-giveaways.forum.my_rank")}
+            </span>
+          </div>
+        )}
+
+        {this.winChance(g) !== null && (
+          <div className="GiveawayPage-stat">
+            <strong>
+              {(this.winChance(g) as number).toFixed(1)}
+              {"%"}
+            </strong>
+            <span>
+              {app.translator.trans(
+                entered
+                  ? "ernestdefoe-giveaways.forum.win_chance"
+                  : "ernestdefoe-giveaways.forum.win_chance_if_join",
+              )}
             </span>
           </div>
         )}

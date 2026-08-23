@@ -37,6 +37,8 @@ ernestdefoe-giveaways:
     entrants: "{count} entrants"
     entrants_label: participants
     my_rank: My rank
+    win_chance: Win chance
+    win_chance_if_join: Win chance if you join
     entrants_list_label: Entrants
     no_entries: "No one has entered yet."
     tickets: "{count, plural, one {# ticket} other {# tickets}}"
