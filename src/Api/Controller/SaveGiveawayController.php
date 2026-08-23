@@ -100,7 +100,7 @@ public function __construct(
             throw new ValidationException($errors);
         }
 
-        if (! $g->slug || array_key_exists('title', $attrs)) {
+        if (! $g->slug) {
             $g->slug = SlugHelper::unique($g->title, fn ($s) => $this->slugExists($s, $g->id));
         }
         if (! $id) {

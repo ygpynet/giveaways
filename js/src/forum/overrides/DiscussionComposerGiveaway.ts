@@ -54,6 +54,22 @@ export default function init() {
                       );
                     }
                     m.redraw();
+                  } else if (saved.slug !== slug) {
+                    // 兜底：后端返回的 slug 与正文不一致时，同步替换正文里的旧标签
+                    const content = dc.composer.fields.content();
+                    const oldTag = `[giveaway slug=${slug}]`;
+                    if (
+                      typeof content === "string" &&
+                      content.includes(oldTag)
+                    ) {
+                      dc.composer.fields.content(
+                        content.replace(
+                          oldTag,
+                          `[giveaway slug=${saved.slug}]`,
+                        ),
+                      );
+                      m.redraw();
+                    }
                   }
                 },
               });
