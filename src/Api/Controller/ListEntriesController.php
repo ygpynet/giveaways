@@ -34,8 +34,8 @@ class ListEntriesController implements RequestHandlerInterface
         $query = GiveawayEntry::query()
             ->where('giveaway_id', $g->id)
             ->with('user')
-            ->orderByDesc('entries')
-            ->orderBy('created_at');
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
 
         $total = (clone $query)->count();
         $items = $query->forPage($page, $perPage)->get();

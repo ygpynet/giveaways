@@ -16,7 +16,7 @@ import {
   listEntries,
 } from "../../common/api";
 import type { Giveaway, GiveawayEntrant, GiveawayGroup } from "../../common/api";
-import { countdown, isPast } from "../../common/format";
+import { countdown, isPast, formatDateTime } from "../../common/format";
 import GiveawayFormModal from "../components/GiveawayFormModal";
 
 export default class GiveawayPage extends Page {
@@ -258,8 +258,8 @@ export default class GiveawayPage extends Page {
             {this.winnerBanner(g)}
             {this.descriptionBlock(g)}
             {this.requirementsBlock(g)}
-            {this.entrantsBlock(g)}
             {this.winnersBlock(g)}
+            {this.entrantsBlock(g)}
             {this.fairnessBlock(g)}
           </div>
           <aside className="GiveawayPage-side">
@@ -418,7 +418,7 @@ export default class GiveawayPage extends Page {
             {app.translator.trans("ernestdefoe-giveaways.forum.no_entries")}
           </p>
         ) : (
-          <ul className="GiveawayPage-winners">
+          <ul className="GiveawayPage-winners GiveawayPage-entrants">
             {this.entrants.map((e) => (
               <li className="GiveawayPage-winner">
                 {e.user ? (
@@ -439,6 +439,13 @@ export default class GiveawayPage extends Page {
                     { count: e.entries },
                   )}
                 </span>
+                <time
+                  className="GiveawayPage-winner-time"
+                  datetime={e.createdAt || undefined}
+                  title={e.createdAt ? formatDateTime(e.createdAt) : undefined}
+                >
+                  {e.createdAt ? humanTime(e.createdAt) : ""}
+                </time>
               </li>
             ))}
           </ul>

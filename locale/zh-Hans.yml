@@ -60,7 +60,7 @@ ernestdefoe-giveaways:
     open_to_groups: "面向 {groups} 开放"
     open_to_admins: "仅管理员可参与"
     group_separator: "、"
-    winners_label: 获奖者
+    winners_label: 获奖名单
     not_drawn_yet: "尚未开奖。"
     no_winners: "没有符合条件的参与者，未抽取获奖者。"
     fairness_label: "可验证公平性"

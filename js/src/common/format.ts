@@ -20,3 +20,12 @@ export function countdown(iso: string | null): string {
 export function isPast(iso: string | null): boolean {
   return !!iso && new Date(iso).getTime() <= Date.now();
 }
+
+/** Absolute local datetime, e.g. "2026-08-23 14:30". */
+export function formatDateTime(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
