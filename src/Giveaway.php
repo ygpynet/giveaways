@@ -73,6 +73,16 @@ class Giveaway extends AbstractModel
         return in_array($status, self::TRANSITIONS[$this->status] ?? [], true);
     }
 
+    /**
+     * Whether attributes may still be edited. Drawn/cancelled giveaways are
+     * published records — their prize text, times and fairness data are
+     * already public, so mutating them would rewrite history.
+     */
+    public function isEditable(): bool
+    {
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_ACTIVE], true);
+    }
+
     protected $casts = [
         'starts_at'    => 'datetime',
         'ends_at'      => 'datetime',

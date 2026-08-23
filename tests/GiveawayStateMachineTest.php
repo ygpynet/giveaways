@@ -53,4 +53,12 @@ class GiveawayStateMachineTest extends TestCase
     {
         $this->assertFalse($this->in('bogus')->canTransitionTo('active'));
     }
+
+    public function testOnlyDraftAndActiveAreEditable(): void
+    {
+        $this->assertTrue($this->in('draft')->isEditable());
+        $this->assertTrue($this->in('active')->isEditable());
+        $this->assertFalse($this->in('drawn')->isEditable());
+        $this->assertFalse($this->in('cancelled')->isEditable());
+    }
 }

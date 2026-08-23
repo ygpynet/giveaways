@@ -17,6 +17,8 @@ ernestdefoe-giveaways:
     claim_not_winner: "您不是此抽奖活动的获奖者。"
     action_failed: "操作失败，请稍后再试。"
     cancel_not_allowed: "该抽奖活动已无法取消。"
+    edit_locked: "该抽奖活动已结束，无法再编辑。"
+    invalid_status: "不允许该状态变更。"
   forum:
     nav: 抽奖活动
     page_title: 抽奖活动

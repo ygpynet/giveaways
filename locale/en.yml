@@ -18,6 +18,8 @@ ernestdefoe-giveaways:
     claim_not_winner: You're not a winner of this giveaway.
     action_failed: Something went wrong. Please try again later.
     cancel_not_allowed: This giveaway can no longer be cancelled.
+    edit_locked: This giveaway has ended and can no longer be edited.
+    invalid_status: That status change is not allowed.
 
   forum:
     # Navigation & page titles

@@ -40,11 +40,34 @@ public function __construct(
         if ($id) {
             $g = Giveaway::query()->findOrFail((int) $id);
             $this->assertCanManage($actor, $g);
+
+            // Published records (drawn/cancelled) are immutable — editing their
+            // prize or dates after winners were announced would rewrite history.
+            if (! $g->isEditable()) {
+                throw new ValidationException([
+                    'status' => $this->translator->trans('ernestdefoe-giveaways.api.edit_locked'),
+                ]);
+            }
         } else {
             $actor->assertCan('giveaways.create');
             $g = new Giveaway();
             $g->user_id = $actor->id;
             $g->status = (($attrs['status'] ?? null) === 'draft') ? 'draft' : 'active';
+        }
+
+        // PATCH may publish a draft (draft → active). Every other transition is
+        // rejected; active → drawn belongs to DrawService alone because it
+        // carries the provably-fair bookkeeping.
+        if ($id && array_key_exists('status', $attrs)) {
+            $to = (string) ($attrs['status'] ?? '');
+            if ($to !== '' && $to !== $g->status) {
+                if ($to === Giveaway::STATUS_DRAWN || ! $g->canTransitionTo($to)) {
+                    throw new ValidationException([
+                        'status' => $this->translator->trans('ernestdefoe-giveaways.api.invalid_status'),
+                    ]);
+                }
+                $g->status = $to;
+            }
         }
 
         $errors = [];
