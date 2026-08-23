@@ -224,7 +224,20 @@ export default class GiveawayPage extends Page {
             <div className="container">
               <Link
                 className="GiveawayPage-back"
-                href={app.route("giveaways.index")}
+                href={
+                  app.history?.canGoBack()
+                    ? app.history.backUrl()
+                    : app.route("giveaways.index")
+                }
+                onclick={(e: MouseEvent) => {
+                  if (e.shiftKey || e.ctrlKey || e.metaKey || e.which === 2)
+                    return;
+                  // 浏览器式返回：有来路就回退到上一页，否则落到抽奖列表
+                  if (app.history?.canGoBack()) {
+                    e.preventDefault();
+                    app.history.back();
+                  }
+                }}
               >
                 <Icon name="fas fa-chevron-left" />{" "}
                 {app.translator.trans("ernestdefoe-giveaways.forum.nav")}
