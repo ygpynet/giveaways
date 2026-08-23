@@ -598,6 +598,15 @@ export default class GiveawayPage extends Page {
           </div>
         )}
 
+        {g.endsAt && (
+          <div className="GiveawayPage-countdown">
+            <Icon name="fas fa-hourglass-half" />{" "}
+            {app.translator.trans("ernestdefoe-giveaways.forum.draw_time")}
+            {": "}
+            {formatDateTime(g.endsAt)}
+          </div>
+        )}
+
         {active &&
           (entered ? (
             <div className="GiveawayPage-entered">

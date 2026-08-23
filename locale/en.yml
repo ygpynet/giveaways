@@ -32,6 +32,7 @@ ernestdefoe-giveaways:
     # Card / status
     ends_in: "Ends in {time}"
     ended: Ended
+    draw_time: Draw time
     starts_in: "Starts in {time}"
     entrants: "{count} entrants"
     entrants_label: participants

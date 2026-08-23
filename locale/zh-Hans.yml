@@ -27,6 +27,7 @@ ernestdefoe-giveaways:
     load_more: "加载更多"
     ends_in: "{time} 后结束"
     ended: 已结束
+    draw_time: 开奖时间
     starts_in: "{time} 后开始"
     entrants: "{count} 人参与"
     entrants_label: 人参与
