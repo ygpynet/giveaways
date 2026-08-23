@@ -5,21 +5,15 @@ import Button from "flarum/common/components/Button";
 
 import GiveawayFormModal from "../components/GiveawayFormModal";
 
-let cachedSlug: string | null = null;
-
 function detectGiveawaySlug(dc): string | null {
   try {
     const content = dc.composer?.fields?.content?.() || "";
     const match = (typeof content === "string" ? content : "").match(
       /\[giveaway slug=([^\s\]]+)/,
     );
-    if (match) {
-      cachedSlug = match[1];
-      return match[1];
-    }
+    if (match) return match[1];
   } catch (e) {}
 
-  if (cachedSlug) return cachedSlug;
   return null;
 }
 
@@ -37,6 +31,7 @@ export default function init() {
           {
             className: "DiscussionComposer-changeTags Button Button--ua-reset",
             onclick: () => {
+              // 立即弹窗，与官方“选择标签”一致，点击时不再发任何请求
               const isEdit = !!slug;
 
               app.modal.show(GiveawayFormModal, {
@@ -45,7 +40,6 @@ export default function init() {
                   if (!saved || !saved.slug) return;
 
                   if (!isEdit) {
-                    cachedSlug = saved.slug;
                     const link = `[giveaway slug=${saved.slug}]`;
                     const editor = dc.composer?.editor;
 
