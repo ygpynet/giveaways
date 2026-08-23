@@ -59,6 +59,7 @@ export interface Giveaway {
   postBonus: number;
   minPosts: number;
   minAgeDays: number;
+  entryCostPoints: number;
   canManage: boolean;
   canViewEntries: boolean;
   enterGroups: GiveawayGroup[];

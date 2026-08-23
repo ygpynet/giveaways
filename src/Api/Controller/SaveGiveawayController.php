@@ -86,7 +86,7 @@ public function __construct(
 
         // Entry-method + eligibility settings.
         $s = $g->settingsArray();
-        foreach (['postBonus' => 'post_bonus', 'minPosts' => 'min_posts', 'minAgeDays' => 'min_age_days'] as $in => $key) {
+        foreach (['postBonus' => 'post_bonus', 'minPosts' => 'min_posts', 'minAgeDays' => 'min_age_days', 'entryCostPoints' => 'entry_cost_points'] as $in => $key) {
             if (array_key_exists($in, $attrs)) {
                 $s[$key] = max(0, (int) $attrs[$in]);
             }

@@ -373,6 +373,16 @@ export default class GiveawayPage extends Page {
           })}
         </li>,
       );
+    if (g.entryCostPoints > 0)
+      reqs.push(
+        <li>
+          <Icon name="fas fa-coins" />{" "}
+          {app.translator.trans(
+            "ernestdefoe-giveaways.forum.req_entry_cost",
+            { count: g.entryCostPoints },
+          )}
+        </li>,
+      );
 
     return (
       <section className="GiveawayPage-section">
@@ -677,17 +687,74 @@ export default class GiveawayPage extends Page {
               )}
             </Button>
           ) : (
-            <Button
-              className="Button Button--primary Button--block"
-              icon="fas fa-ticket-alt"
-              loading={this.entering}
-              onclick={() => this.enter()}
-            >
-              {app.translator.trans("ernestdefoe-giveaways.forum.enter")}
-            </Button>
+            <>
+              {g.entryCostPoints > 0 && this.costLine(g)}
+              <Button
+                className="Button Button--primary Button--block"
+                icon="fas fa-ticket-alt"
+                loading={this.entering}
+                disabled={this.insufficientPoints(g)}
+                onclick={() => this.enter()}
+              >
+                {app.translator.trans("ernestdefoe-giveaways.forum.enter")}
+              </Button>
+            </>
           ))}
 
         {active && entered && g.postBonus > 0 && this.earnMore(g)}
+      </div>
+    );
+  }
+
+  /**
+   * The actor's point balance, as serialized on the session user by
+   * ramon/point-system (attribute `pointBalance`). 0 when unknown.
+   */
+  myPointBalance(): number {
+    const user = app.session.user;
+    return Number(user?.attribute("pointBalance") ?? 0) || 0;
+  }
+
+  /**
+   * Short points unit name as configured in ramon/point-system
+   * (forum attribute `pointSystem.points_short`, default "pts").
+   */
+  pointsUnit(): string {
+    return String(app.forum.attribute("pointSystem.points_short") || "").trim();
+  }
+
+  insufficientPoints(g: Giveaway): boolean {
+    return g.entryCostPoints > 0 && this.myPointBalance() < g.entryCostPoints;
+  }
+
+  costLine(g: Giveaway): Mithril.Children {
+    const insufficient = this.insufficientPoints(g);
+    const unit = this.pointsUnit();
+    return (
+      <div
+        className={
+          "GiveawayPage-cost" + (insufficient ? " is-insufficient" : "")
+        }
+      >
+        <div className="GiveawayPage-cost-icon">
+          <Icon name="fas fa-coins" />
+        </div>
+        <span className="GiveawayPage-cost-text">
+          <span className="GiveawayPage-cost-row">
+            {app.translator.trans(
+              "ernestdefoe-giveaways.forum.entry_cost_line",
+              { count: g.entryCostPoints },
+            )}
+            {unit ? ` ${unit}` : ""}
+          </span>
+          <span className="GiveawayPage-cost-row">
+            {app.translator.trans(
+              "ernestdefoe-giveaways.forum.entry_balance_line",
+              { balance: this.myPointBalance() },
+            )}
+            {unit ? ` ${unit}` : ""}
+          </span>
+        </span>
       </div>
     );
   }

@@ -102,4 +102,50 @@ class EntryServiceTest extends TestCase
 
         $this->assertNull($this->service()->ineligibleReason($g, $this->user()));
     }
+
+    public function testEntryCostReadsFromSettings(): void
+    {
+        $g = $this->giveaway([
+            'status'    => 'active',
+            'starts_at' => Carbon::parse('-1 hour'),
+            'ends_at'   => Carbon::parse('+1 day'),
+            'settings'  => json_encode(['entry_cost_points' => 25]),
+        ]);
+
+        $this->assertSame(25, $this->service()->entryCost($g));
+    }
+
+    public function testFreeGiveawayHasZeroCost(): void
+    {
+        $g = $this->giveaway([
+            'status'    => 'active',
+            'starts_at' => Carbon::parse('-1 hour'),
+            'ends_at'   => Carbon::parse('+1 day'),
+        ]);
+
+        $this->assertSame(0, $this->service()->entryCost($g));
+    }
+
+    /**
+     * With no point system installed, a paid giveaway must refuse entry with
+     * an explicit reason rather than silently entering for free.
+     */
+    public function testPaidGiveawayWithoutPointSystemIsIneligible(): void
+    {
+        if (\ErnestDefoe\Giveaways\Support\PointSystem::available()) {
+            $this->markTestSkipped('ramon/point-system is installed');
+        }
+
+        $g = $this->giveaway([
+            'status'    => 'active',
+            'starts_at' => Carbon::parse('-1 hour'),
+            'ends_at'   => Carbon::parse('+1 day'),
+            'settings'  => json_encode(['entry_cost_points' => 10]),
+        ]);
+
+        $this->assertSame(
+            'ernestdefoe-giveaways.api.enter_points_unavailable',
+            $this->service()->ineligibleReason($g, $this->user())
+        );
+    }
 }

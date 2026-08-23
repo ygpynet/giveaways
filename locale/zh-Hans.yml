@@ -12,6 +12,8 @@ ernestdefoe-giveaways:
     enter_cancelled: "该抽奖活动已取消，无法参与。"
     enter_min_posts: "您需要至少发帖 {count} 条才能参与。"
     enter_too_new: "您的账号注册时间太短，无法参与此抽奖。"
+    enter_insufficient_points: "积分不足：参与需要 {cost} 积分，您当前有 {balance} 积分。"
+    enter_points_unavailable: "此抽奖需消耗积分，但积分系统当前不可用。"
     claim_not_winner: "您不是此抽奖活动的获奖者。"
     action_failed: "操作失败，请稍后再试。"
   forum:
@@ -48,6 +50,8 @@ ernestdefoe-giveaways:
     enter_again: "您已参与"
     login_to_enter: "登录以参与"
     enter_success: "成功参与！祝你好运。"
+    entry_cost_line: "参与积分：{count}"
+    entry_balance_line: "您的余额：{balance}"
     earn_more: "获取更多抽奖券"
     earn_post: "在社区发帖可获得 +{count} 额外抽奖券"
     earned_post: "发帖奖励已发放 (+{count})"
@@ -57,6 +61,7 @@ ernestdefoe-giveaways:
     requirements_label: 参与条件
     req_min_posts: "至少发帖 {count} 条"
     req_min_age: "账号注册时间至少 {count} 天"
+    req_entry_cost: "参与需消耗 {count} 积分"
     no_requirements: "面向所有成员开放"
     open_to_members: "面向所有成员开放"
     open_to_everyone: "面向所有人开放"
@@ -119,6 +124,8 @@ ernestdefoe-giveaways:
       post_bonus_help: "当参与者在社区任何地方发帖时给予的一次性奖励。"
       min_posts_label: "参与所需的最少发帖数"
       min_age_label: "最少账号注册天数"
+      entry_cost_label: "参与所需积分"
+      entry_cost_help: "参与者加入时将从其积分余额中一次性扣除（需要 ramon/point-system 积分扩展）。0 表示免费参与。"
       submit: "保存抽奖活动"
       cancel: 取消
   admin:

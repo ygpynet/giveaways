@@ -375,6 +375,36 @@
   background: fade(@gv-accent, 12%);
   border-radius: 8px;
 }
+.GiveawayPage-cost {
+  // Full-width chip (same as the .Button--block below), left-aligned text,
+  // icon centered on its own row.
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: stretch;
+  text-align: left;
+  margin-bottom: 14px;
+  padding: 8px 13px;
+  border-radius: 8px;
+  background: fade(@gv-golden, 12%);
+  color: @gv-ink;
+  font-size: 0.9rem;
+  &-icon {
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+  }
+  &-text {
+    display: flex;
+    flex-direction: column;
+  }
+  // Fixed colors on purpose: Flarum's --alert-error-color is WHITE (meant for
+  // solid red alert backgrounds), which is unreadable on this tinted chip.
+  &.is-insufficient {
+    background: fade(#dc2626, 14%);
+    color: #dc2626;
+  }
+}
 .GiveawayPage-earn {
   margin-top: 16px;
   h4 {

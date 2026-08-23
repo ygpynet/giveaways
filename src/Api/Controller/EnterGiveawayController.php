@@ -7,6 +7,7 @@ use ErnestDefoe\Giveaways\EntryService;
 use ErnestDefoe\Giveaways\Giveaway;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
+use Flarum\Locale\TranslatorInterface;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -16,8 +17,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 /** POST /api/giveaways/{id}/enter — register the actor's base entry. */
 class EnterGiveawayController implements RequestHandlerInterface
 {
-    public function __construct(protected EntryService $entries)
-    {
+    public function __construct(
+        protected EntryService $entries,
+        protected TranslatorInterface $translator,
+    ) {
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -34,7 +37,16 @@ class EnterGiveawayController implements RequestHandlerInterface
             throw new ValidationException(['enter' => $reason]);
         }
 
-        $this->entries->enter($g, $actor);
+        try {
+            $this->entries->enter($g, $actor);
+        } catch (\DomainException $e) {
+            // Race fallback: the balance dropped between the eligibility check
+            // and the atomic charge (e.g. a concurrent spend on another tab).
+            throw new ValidationException(['enter' => $this->translator->trans(
+                'ernestdefoe-giveaways.api.enter_insufficient_points',
+                ['cost' => $this->entries->entryCost($g), 'balance' => \ErnestDefoe\Giveaways\Support\PointSystem::balanceOf($actor)]
+            )]);
+        }
 
         return new JsonResponse(['data' => GiveawayPresenter::forActor($actor)->present($g, true)]);
     }

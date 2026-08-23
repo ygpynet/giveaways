@@ -81,6 +81,7 @@ class Giveaway extends AbstractModel
             'post_bonus'         => 0,   // bonus entries for posting during the window (0 = off)
             'min_posts'          => 0,
             'min_age_days'       => 0,
+            'entry_cost_points'  => 0,   // points charged on entry, ramon/point-system balance (0 = free)
             'claim_instructions' => '',  // shown to winners when they claim their prize
         ], $s);
     }

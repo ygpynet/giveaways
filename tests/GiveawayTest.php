@@ -16,6 +16,7 @@ class GiveawayTest extends TestCase
             'post_bonus'         => 0,
             'min_posts'          => 0,
             'min_age_days'       => 0,
+            'entry_cost_points'  => 0,
             'claim_instructions' => '',
         ], $g->settingsArray());
     }

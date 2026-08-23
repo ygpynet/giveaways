@@ -102,6 +102,7 @@ class GiveawayPresenter
             'postBonus'    => (int) ($s['post_bonus'] ?? 0),
             'minPosts'     => (int) ($s['min_posts'] ?? 0),
             'minAgeDays'   => (int) ($s['min_age_days'] ?? 0),
+            'entryCostPoints' => (int) ($s['entry_cost_points'] ?? 0),
             'canManage'    => $canManage,
             'canViewEntries' => $canManage || $this->actor->hasPermission('giveaways.viewEntries'),
             'enterGroups'  => $this->enterGroups(),

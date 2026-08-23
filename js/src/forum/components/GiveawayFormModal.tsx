@@ -45,6 +45,7 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
   postBonus!: Stream<number>;
   minPosts!: Stream<number>;
   minAgeDays!: Stream<number>;
+  entryCost!: Stream<number>;
   categoryId!: Stream<number>;
   claimInstructions!: Stream<string>;
   categories: GiveawayCategory[] = [];
@@ -96,6 +97,7 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
     this.postBonus = Stream(g?.postBonus || 0);
     this.minPosts = Stream(g?.minPosts || 0);
     this.minAgeDays = Stream(g?.minAgeDays || 0);
+    this.entryCost = Stream(g?.entryCostPoints || 0);
   }
 
   className() {
@@ -225,6 +227,14 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
             {this.numberField(t("min_posts_label"), this.minPosts, 0)}
             {this.numberField(t("min_age_label"), this.minAgeDays, 0)}
           </div>
+          <div className="GiveawayFormModal-row">
+            {this.numberField(
+              t("entry_cost_label"),
+              this.entryCost,
+              0,
+              t("entry_cost_help"),
+            )}
+          </div>
           {this.field(
             t("claim_label"),
             <textarea
@@ -305,6 +315,7 @@ export default class GiveawayFormModal extends FormModal<GiveawayFormAttrs> {
       postBonus: this.postBonus(),
       minPosts: this.minPosts(),
       minAgeDays: this.minAgeDays(),
+      entryCostPoints: this.entryCost(),
       categoryId: this.categoryId() || null,
       claimInstructions: this.claimInstructions(),
     };

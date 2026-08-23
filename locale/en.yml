@@ -13,6 +13,8 @@ ernestdefoe-giveaways:
     enter_cancelled: This giveaway has been cancelled.
     enter_min_posts: "You need at least {count} posts to enter."
     enter_too_new: Your account is too new to enter this giveaway.
+    enter_insufficient_points: "Not enough points: entering costs {cost} points, you have {balance}."
+    enter_points_unavailable: "This giveaway costs points, but the point system is currently unavailable."
     claim_not_winner: You're not a winner of this giveaway.
     action_failed: Something went wrong. Please try again later.
 
@@ -55,6 +57,8 @@ ernestdefoe-giveaways:
     enter_again: You're entered
     login_to_enter: Log in to enter
     enter_success: You're in! Good luck.
+    entry_cost_line: "Entry cost: {count}"
+    entry_balance_line: "Your balance: {balance}"
     earn_more: Earn more entries
     earn_post: "Post in the community for +{count} bonus {count, plural, one {entry} other {entries}}"
     earned_post: "Bonus for posting (+{count})"
@@ -66,6 +70,7 @@ ernestdefoe-giveaways:
     requirements_label: Requirements
     req_min_posts: "At least {count} {count, plural, one {post} other {posts}}"
     req_min_age: "Account at least {count} {count, plural, one {day} other {days}} old"
+    req_entry_cost: "Costs {count} points to enter"
     no_requirements: Open to all members
     open_to_members: Open to all members
     open_to_everyone: Open to everyone
@@ -139,6 +144,8 @@ ernestdefoe-giveaways:
       post_bonus_help: One-time bonus granted when an entrant posts anywhere in the community.
       min_posts_label: Minimum posts to enter
       min_age_label: Minimum account age (days)
+      entry_cost_label: Points cost to enter
+      entry_cost_help: Charged once from the entrant's point balance when they enter (requires ramon/point-system). 0 = free.
       submit: Save giveaway
       cancel: Cancel
 
